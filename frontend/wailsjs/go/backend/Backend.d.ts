@@ -6,4 +6,6 @@ export function GetModules():Promise<Array<any>>;
 
 export function GetPlatform():Promise<string>;
 
+export function KillProcess(arg1:string,arg2:boolean):Promise<void>;
+
 export function SetContext(arg1:context.Context):Promise<void>;

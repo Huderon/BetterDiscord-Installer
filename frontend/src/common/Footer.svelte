@@ -6,14 +6,14 @@
     import SocialLinks from "./SocialLinks.svelte";
     import {canGoForward, canGoBack, nextPage, state} from "../stores/navigation";
     import {push, pop, location} from "svelte-spa-router";
+    import quit from "../actions/quit";
 
     let nextButtonContent = "Next";
 
     async function goToNext() {
         state.direction = 1;
         if ($nextPage) push($nextPage);
-        // TODO: exit
-        // else electron.remote.app.exit();
+        else await quit();
     }
 
     function goBack() {
@@ -29,7 +29,7 @@
     else {
         nextButtonContent = "Next";
     }
-    
+
     function navigatePage() {
         if ((event.key === "ArrowRight" && event.ctrlKey) && $canGoForward) {
             goToNext();

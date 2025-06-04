@@ -6,6 +6,33 @@ import (
 	"github.com/shirou/gopsutil/v3/process"
 )
 
+func IsRunning(name string) (bool, error) {
+	processes, err := process.Processes()
+
+	// If we can't even list processes, bail out
+	if err != nil {
+		return false, fmt.Errorf("could not list processes")
+	}
+
+	// Search for desired processe(s)
+	for _, p := range processes {
+		n, err := p.Name()
+
+		// Ignore processes requiring Admin/Sudo
+		if err != nil {
+			continue
+		}
+
+		// We found our target return
+		if n == name {
+			return true, nil
+		}
+	}
+
+	// If we got here, process was not found
+	return false, nil
+}
+
 func KillProcess(name string) error {
 	processes, err := process.Processes()
 

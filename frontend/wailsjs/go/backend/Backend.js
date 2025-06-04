@@ -10,6 +10,10 @@ export function GetPlatform() {
   return window['go']['backend']['Backend']['GetPlatform']();
 }
 
+export function KillProcess(arg1, arg2) {
+  return window['go']['backend']['Backend']['KillProcess'](arg1, arg2);
+}
+
 export function SetContext(arg1) {
   return window['go']['backend']['Backend']['SetContext'](arg1);
 }

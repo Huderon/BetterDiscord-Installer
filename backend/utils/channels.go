@@ -35,11 +35,12 @@ func GetExecutableName(channel string) string {
 		return name
 	}
 
-	switch op := runtime.GOOS; op {
-	case "windows":
-		name = name + ".exe"
-	case "darwin", "linux":
+	if runtime.GOOS != "darwin" {
 		name = strings.ReplaceAll(name, " ", "")
+	}
+
+	if runtime.GOOS == "windows" {
+		name = name + ".exe"
 	}
 
 	return name
