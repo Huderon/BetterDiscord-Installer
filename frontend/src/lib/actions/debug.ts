@@ -8,7 +8,7 @@ function log(entry: string) {
     });
 }
 
-export default async function(discordPaths: string[]) {
+export default async function(channels: string[], discordPaths: string[]) {
     discordPaths.forEach(v => log(v));
     setTimeout(() => {progress.set(10);}, 200);
     setTimeout(() => {progress.set(25);}, 500);

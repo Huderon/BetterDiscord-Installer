@@ -1,4 +1,5 @@
 import {paths, os} from "$lib/stores/installation";
+import type {OSName} from "$lib/types";
 import {GetPlatform as platform} from "@backend/Backend";
 import {GetDiscordPath as getDiscordPath} from "@backend/Paths";
 
@@ -14,7 +15,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 try {
-    platform().then(osName => os.set(osName));
+    platform().then(osName => os.set(osName as OSName));
 
     const channels = ["stable", "ptb", "canary"];
 

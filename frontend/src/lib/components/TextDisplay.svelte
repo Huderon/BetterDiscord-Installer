@@ -1,61 +1,67 @@
 <script lang="ts">
+    import {tick} from "svelte";
     import Button from "./Button.svelte";
     import LoadingPage from "./Loader.svelte";
-    import {beforeUpdate, afterUpdate} from "svelte";
-    export let value;
-    export let element;
-    export let autoscroll;
 
-    let scroller;
 
-    let copyInputContainer;
-    let copyButtonActive = false;
-    let copyButtonVisible = false;
+    interface Props {
+        value: string;
+        autoscroll?: boolean;
+    }
+
+    const {value, autoscroll = false}: Props = $props();
+
+    let scroller: HTMLDivElement | undefined = $state();
+    let element: HTMLElement | undefined = $state();
+    let copyInputContainer: HTMLDivElement | undefined = $state();
+    let copyButtonActive = $state(false);
+    let copyButtonVisible = $state(false);
+    let shouldAutoscroll: boolean = autoscroll;
 
     // Copy button
     function copyDisplayContents() {
+        if (!element) return;
         copyButtonActive = true;
         const range = document.createRange();
         range.selectNode(element);
-        window.getSelection().addRange(range);
+        window.getSelection()?.addRange(range);
         document.execCommand("Copy");
-        document.getSelection().removeAllRanges();
+        document.getSelection()?.removeAllRanges();
         setTimeout(() => {
             copyButtonActive = false;
         }, 500);
     }
 
-    function handleKeyboardCopyToggle() {
+    function handleKeyboardCopyToggle(event: KeyboardEvent) {
         if (event.key === "Enter" || event.key === " ") copyDisplayContents();
     }
 
     // Autoscroll
-
-    beforeUpdate(() => {
-        autoscroll = scroller && (scroller.offsetHeight + scroller.scrollTop) > (scroller.scrollHeight - 20);
-    });
-
-    afterUpdate(() => {
-        if (scroller && autoscroll) scroller.scrollTo(0, scroller.scrollHeight);
+    $effect.pre(() => {
+        if (!value || !autoscroll) return;
+        shouldAutoscroll = !!(scroller && (scroller.offsetHeight + scroller.scrollTop) > (scroller.scrollHeight - 20));
+        if (!shouldAutoscroll) return;
+        tick().then(() => {
+            scroller?.scrollTo(0, scroller?.scrollHeight);
+        });
     });
 </script>
 
 {#if value}
     <article
         bind:this={element}
-        on:mousemove={() => copyButtonVisible = true}
-        on:mouseleave={() => copyButtonVisible = false}
+        onmousemove={() => copyButtonVisible = true}
+        onmouseleave={() => copyButtonVisible = false}
         class="text-display{value ? "" : " loading"}"
     >
-        <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-        <div bind:this={scroller} on:scroll={() => copyButtonVisible = false} class="display-inner" tabindex="0">
+        <div bind:this={scroller} onscroll={() => copyButtonVisible = false} class="display-inner" tabindex="0" role="textbox">
             {value}
         </div>
         <div bind:this={copyInputContainer} class="copy-input" class:visible={copyButtonVisible}>
             {#if copyButtonActive}
-                <Button tabindex="0" type="primary" on:keypress={handleKeyboardCopyToggle} on:click={copyDisplayContents}>Copied!</Button>
+                <Button tabindex="0" style="primary" onkeypress={handleKeyboardCopyToggle} onclick={copyDisplayContents}>Copied!</Button>
             {:else}
-                <Button tabindex="0" type="secondary" on:keypress={handleKeyboardCopyToggle} on:click={copyDisplayContents}>Copy</Button>
+                <Button tabindex="0" style="secondary" onkeypress={handleKeyboardCopyToggle} onclick={copyDisplayContents}>Copy</Button>
             {/if}
         </div>
     </article>

@@ -1,21 +1,27 @@
 <script lang="ts">
-    export let hasMargin = undefined; // eslint-disable-line no-undef-init
-    export let type = "paragraph";
-    let className = undefined; // eslint-disable-line no-undef-init
-    export {className as class};
+    import type {Snippet} from "svelte";
+
+
+    interface Props {
+        type: "header" | "paragraph" | "subtext";
+        hasMargin?: boolean;
+        children: Snippet
+    }
+
+    const {hasMargin = false, type = "paragraph", children}: Props = $props();
 </script>
 
 {#if type === "header"}
-    <h3 class="header {className}" class:has-margin={hasMargin} {...$$restProps}>
-        <slot />
+    <h3 class="header" class:has-margin={hasMargin}>
+        {@render children()}
     </h3>
     {:else if type === "paragraph"}
-    <p class="paragraph {className}" class:has-margin={hasMargin} {...$$restProps}>
-        <slot />
+    <p class="paragraph" class:has-margin={hasMargin}>
+        {@render children()}
     </p>
     {:else if type === "subtext"}
-    <span class="subtext {className}" class:has-margin={hasMargin} {...$$restProps}>
-        <slot />
+    <span class="subtext" class:has-margin={hasMargin}>
+        {@render children()}
     </span>
 {/if}
 

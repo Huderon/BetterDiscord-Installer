@@ -2,12 +2,19 @@
     // NOTES: preventing the default click event behavior is needed to stop the change event being fired twice when the spacebar is pressed.
     import {handleKeyboardToggle, checkItem} from "../stores/controls";
 
-    export let checked = false;
-    export let label = undefined; // eslint-disable-line no-undef-init
 
-    let checkbox;
+    interface Props {
+        checked: boolean;
+        label?: string;
+        onchange?(e: Event): void;
+    }
 
-    function handleKeyDown(e) {
+    // eslint-disable-next-line prefer-const
+    let {checked, label, onchange}: Props = $props();
+
+    let checkbox: HTMLInputElement;
+
+    function handleKeyDown(e: KeyboardEvent) {
         if (e.key === " ") {
             e.preventDefault();
             checkItem(checkbox);
@@ -15,11 +22,11 @@
     }
 </script>
 
-<!-- svelte-ignore a11y-label-has-associated-control -->
-<!-- https://github.com/sveltejs/svelte/issues/5528 -->
-<label class="checkbox-container" on:keypress={handleKeyboardToggle(checkbox)}>
+
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<label class="checkbox-container" onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)}>
     <div class="checkbox-inner">
-        <input class="checkbox" type="checkbox" bind:this={checkbox} bind:checked on:change on:keydown={handleKeyDown} {...$$restProps} />
+        <input class="checkbox" type="checkbox" bind:this={checkbox} bind:checked {onchange} onkeydown={handleKeyDown} />
         <svg class="checkbox-glyph" viewBox="0 0 24 24">
             <path d="M0.73, 11.91 8.1,19.28 22.79,4.59" fill="none" />
         </svg>
@@ -28,6 +35,7 @@
         <span class="checkbox-label">{label}</span>
     {/if}
 </label>
+
 
 <style>
     .checkbox-container {

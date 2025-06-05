@@ -10,15 +10,15 @@ export function checkItem(item: HTMLInputElement) {
     item.dispatchEvent(changeEvent);
 }
 
-export const handleKeyboardToggle = (checkbox: HTMLInputElement) => {
+export const handleKeyboardToggle = (event: KeyboardEvent, checkbox: HTMLInputElement) => {
     if ((event.key === "Enter" || event.key === " ") && !checkbox.disabled) {
         checkItem(checkbox);
     }
 };
 
-export const handleArrowKeys = (container: HTMLDivElement) => {
+export const handleArrowKeys = (event: KeyboardEvent, container: HTMLDivElement) => {
     container.focus();
-    if (container.hasAttribute("selected-index")) i = parseInt(container.getAttribute("selected-index")!);
+    if (container.hasAttribute("data-selected-index")) i = parseInt(container.getAttribute("data-selected-index")!);
     if (event.key === "ArrowDown") {
         if (i < (container.children.length - 2)) i++;
         else i = 0;

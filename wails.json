@@ -7,7 +7,6 @@
     "frontend:dev:watcher": "bun run dev",
     "frontend:dev:serverUrl": "auto",
     "wailsjsdir": "./frontend/src/lib",
-    "assetdir": "./assets",
     "info": {
       "productName": "BetterDiscord Installer",
       "productVersion": "2.0.0-alpha"

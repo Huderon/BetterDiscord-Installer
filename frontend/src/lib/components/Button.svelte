@@ -1,18 +1,30 @@
 <script lang="ts">
-    export let type = "secondary";
+    import type {Snippet} from "svelte";
 
-    const types = ["primary", "secondary"];
+    interface Props {
+        style?: "primary" | "secondary";
+        tabindex?: number|string;
+        disabled?: boolean;
+        onkeypress?(event: KeyboardEvent): void;
+        onclick?(event: MouseEvent): void;
+        children: Snippet;
+    }
+
+    const {style = "secondary", onkeypress, onclick, children, tabindex, disabled = false}: Props = $props();
+
+    const styles = ["primary", "secondary"];
 </script>
 
 <button
-    class="button {types.includes(type) ? `type-${type}` : "type-secondary"}"
+    class="button {styles.includes(style) ? `style-${style}` : "style-secondary"}"
     type="button"
-    on:keypress
-    on:click|preventDefault|stopPropagation
-    {...$$restProps}
+    {onkeypress}
+    {onclick}
+    tabindex={tabindex as number}
+    {disabled}
 >
     <span>
-        <slot></slot>
+        {@render children()}
     </span>
 </button>
 
@@ -45,23 +57,23 @@
         text-overflow: ellipsis;
     }
 
-    .button.type-primary {
+    .button.style-primary {
         border: 1px solid transparent;
         background-color: var(--accent);
         color: #ffffff;
     }
 
-    .button.type-primary:hover {
+    .button.style-primary:hover {
         background-color: var(--accent-hover);
     }
 
-    .button.type-secondary {
+    .button.style-secondary {
         background-color: transparent;
         border: 1px solid rgba(255, 255, 255, 0.05);
         color: var(--text-normal);
     }
 
-    .button.type-secondary:hover {
+    .button.style-secondary:hover {
         border-color: rgba(255, 255, 255, 0.1);
     }
 </style>

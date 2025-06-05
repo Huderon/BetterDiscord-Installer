@@ -1,16 +1,21 @@
 <script lang="ts">
-    export let value = 0;
-    export let max = 100;
-    export let indeterminate = false;
-    let className;
-    export {className as class};
+    import type {ClassValue} from "svelte/elements";
+
+    interface Props {
+        value?: number;
+        max?: number;
+        indeterminate?: boolean;
+        class: ClassValue;
+    }
+
+    // eslint-disable-next-line prefer-const
+    let {value = 0, max = 100, indeterminate = false, class: className}: Props = $props();
 </script>
 
-<div class="progress-bar {className}" {...$$restProps}>
+<div class="progress-bar {className}">
     {#if indeterminate}
         <div class="progress-fill increase"></div>
         <div class="progress-fill decrease"></div>
-
     {:else}
         <div class="progress-fill" style:width="{(value / max) * 100}%"></div>
     {/if}

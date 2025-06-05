@@ -1,25 +1,29 @@
 <script lang="ts">
-    export let text = "";
-    export let color = "default";
-    export let position = "top";
-    export let x = 0;
-    export let y = 0;
-    export let element = undefined; // eslint-disable-line no-undef-init
+    import type {TooltipProps} from "./tooltip";
 
-    $: colors = ["default", "danger", "accent"];
-    $: positions = ["top", "bottom", "left", "right"];
+
+    // eslint-disable-next-line prefer-const
+    let {text = "", color = "default", position = "top", x = 0, y = 0}: TooltipProps = $props();
+    let element: HTMLDivElement;
+
+
+    export const getElement = () => element;
+    export const setCoords = (newx: number, newy: number) => {
+        x = newx;
+        y = newy;
+    };
 </script>
 
-<svelte:options accessors />
 
 <div
-bind:this={element}
+    bind:this={element}
     style:--tooltip-x="{x}px" style:--tooltip-y="{y}px"
-    class="tooltip {positions.includes(position) ? `position-${position}` : "position-top"} {colors.includes(color) ? `color-${color}` : "color-default"}"
+    class="tooltip {`position-${position} color-${color}`}"
 >
     <div class="tooltip-pointer"></div>
     <span class="tooltip-content">{text}</span>
 </div>
+
 
 <style>
     @keyframes tooltip-in {
@@ -60,7 +64,7 @@ bind:this={element}
         word-wrap: break-word;
         z-index: 1002;
         will-change: opacity, transform;
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
         background-color: var(--tooltip-background);
         color: var(--tooltip-text);
         transition: 50ms ease-in-out opacity, 50ms ease-in-out transform;

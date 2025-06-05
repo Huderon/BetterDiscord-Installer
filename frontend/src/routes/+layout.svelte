@@ -12,6 +12,7 @@
     const {children} = $props();
 </script>
 
+ <!-- eslint-disable-next-line svelte/no-unused-class-name -->
 <div class="main-window platform-{$os || "windows"}">
     <Titlebar macButtons={$os === "darwin"} />
     <main class="installer-body">

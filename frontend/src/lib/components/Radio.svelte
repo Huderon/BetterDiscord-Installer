@@ -1,16 +1,22 @@
 <script lang="ts">
-    export let group;
-    export let value;
+    import type {Snippet} from "svelte";
 
-    let checkbox;
+    interface Props {
+        group: string;
+        value: string;
+        onchange?(event: Event): void;
+        children?: Snippet;
+    }
+
+    // eslint-disable-next-line prefer-const
+    let {group = $bindable(), value, onchange, children}: Props = $props();
 </script>
 
 <label class="radio-container">
-    <input bind:this={checkbox} type="radio" hidden bind:group on:change {value} />
-    <div tabindex="-1" class="radio-item" {...$$restProps}>
+    <input type="radio" hidden bind:group {onchange} {value} />
+    <div tabindex="-1" class="radio-item">
         <div>
-            <slot name="icon"></slot>
-            <slot></slot>
+            {@render children?.()}
         </div>
     </div>
 </label>

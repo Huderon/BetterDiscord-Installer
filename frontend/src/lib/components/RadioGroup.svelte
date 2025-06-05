@@ -1,21 +1,22 @@
 <script lang="ts">
+    import type {Snippet} from "svelte";
     import {handleArrowKeys} from "../stores/controls";
-    export let index = 0;
 
-    let container;
+    const {index = 0, children}: {index?: number, children: Snippet} = $props();
+
+    let container: HTMLDivElement;
 </script>
 
 <div
-    on:keydown={handleArrowKeys(container)}
+    onkeydown={(e: KeyboardEvent) => handleArrowKeys(e, container)}
     bind:this={container}
     tabindex="0"
-    selected-index={index}
+    data-selected-index={index}
     style:--index={index}
     class="radio-group"
     role="radiogroup"
-    {...$$restProps}
 >
-    <slot />
+    {@render children?.()}
     <div class="selection-indicator"></div>
 </div>
 

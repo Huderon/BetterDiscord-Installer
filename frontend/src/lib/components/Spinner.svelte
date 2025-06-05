@@ -1,24 +1,22 @@
 <script lang="ts">
-    import {afterUpdate, onMount} from "svelte";
-    export let value = undefined; // eslint-disable-line no-undef-init
-    let className = undefined; // eslint-disable-line no-undef-init
-    export {className as class};
+    import {onMount} from "svelte";
 
-    let circle;
+    let circle: SVGCircleElement;
+    let value = $state(0);
 
     function updateValue() {
-        const circumference = Math.PI * (circle.getAttribute("r") * 2);
+        const circumference = Math.PI * (parseInt(circle.getAttribute("r")!) * 2);
         if (value < 0) value = 0;
         if (value > 100) value = 100;
-        circle.style.strokeDashoffset = ((100 - value) / 100) * circumference;
+        circle!.style.strokeDashoffset = `${((100 - value) / 100) * circumference}`;
     }
 
     onMount(updateValue);
-    afterUpdate(updateValue);
+    $effect(updateValue);
 </script>
 
 <svg
-    class="spinner {className}"
+    class="spinner"
     class:indeterminate={!value}
     width="32"
     height="32"
@@ -27,7 +25,6 @@
     aria-valuemin={value ? 0 : undefined}
     aria-valuemax={value ? 100 : undefined}
     aria-valuenow={value}
-    {...$$restProps}
 >
     <circle class="spinner-ring" cx="50%" cy="50%" r="7" />
     <circle class="spinner-fill" cx="50%" cy="50%" r="7" stroke-dasharray="3" bind:this={circle} />

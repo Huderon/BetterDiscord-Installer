@@ -1,7 +1,17 @@
 import {state} from "../stores/navigation";
 import {quartInOut} from "svelte/easing";
 
-export default function page(node: HTMLElement, {delay = 0, duration = 250, easing = quartInOut, x = 550, y = 0, out = false}) {
+
+interface PTProps {
+    delay: number;
+    duration: number;
+    easing(n: number): number;
+    x: number;
+    y: number;
+    out: boolean;
+}
+
+export default function page(node: HTMLElement, {delay = 0, duration = 250, easing = quartInOut, x = 550, y = 0, out = false}: Partial<PTProps> = {}) {
     const style = getComputedStyle(node);
     const transform = style.transform === "none" ? "" : style.transform;
 

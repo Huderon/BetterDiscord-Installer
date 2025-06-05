@@ -1,20 +1,19 @@
 <script lang="ts">
-    // const electron = require("electron");
-
     import Button from "./Button.svelte";
     import ButtonGroup from "./ButtonGroup.svelte";
     import SocialLinks from "./SocialLinks.svelte";
     import {canGoForward, canGoBack, nextPage, state} from "../stores/navigation";
-    // import {push, pop, location} from "svelte-spa-router";
     import quit from "../actions/quit";
-    import {goto, pushState} from "$app/navigation";
+    import {goto, onNavigate} from "$app/navigation";
     import {page} from "$app/state";
+    import {base} from "$app/paths";
+
 
     let nextButtonContent = "Next";
 
     async function goToNext() {
         state.direction = 1;
-        if ($nextPage) goto($nextPage, page.state);
+        if ($nextPage) goto(`${base}${$nextPage}`, page.state);
         else await quit();
     }
 
@@ -23,16 +22,18 @@
         window.history.back();
     }
 
-    $: if (window.location.pathname.startsWith("/setup/")) {
-        const action = window.location.pathname.slice(7);
-        const actionText = action[0].toUpperCase() + action.slice(1);
-        nextButtonContent = actionText;
-    }
-    else {
-        nextButtonContent = "Next";
-    }
+    onNavigate(() => {
+        if (window.location.pathname.startsWith("/actions/setup/")) {
+            const action = window.location.pathname.slice(15);
+            const actionText = action[0].toUpperCase() + action.slice(1);
+            nextButtonContent = actionText;
+        }
+        else {
+            nextButtonContent = "Next";
+        }
+    });
 
-    function navigatePage() {
+    function navigatePage(event: KeyboardEvent) {
         if ((event.key === "ArrowRight" && event.ctrlKey) && $canGoForward) {
             goToNext();
         }
@@ -48,8 +49,8 @@
 <footer class="install-footer">
     <SocialLinks />
     <ButtonGroup>
-        <Button type="secondary" disabled={!$canGoBack} on:click={goBack}>Back</Button>
-        <Button type="primary" disabled={!$canGoForward} on:click={goToNext}>{#if $nextPage}{nextButtonContent}{:else}Close{/if}</Button>
+        <Button style="secondary" disabled={!$canGoBack} onclick={goBack}>Back</Button>
+        <Button style="primary" disabled={!$canGoForward} onclick={goToNext}>{#if $nextPage}{nextButtonContent}{:else}Close{/if}</Button>
     </ButtonGroup>
 </footer>
 

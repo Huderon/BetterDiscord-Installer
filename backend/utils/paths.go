@@ -48,17 +48,30 @@ func DiscordPath(channel string) string {
 	}
 }
 
+// TODO: make this check and attempt to return the base path when full path doesn't exist
 func BrowsePath(channel string) string {
 	var channelName = GetChannelName(channel)
-
+	var candidate = ""
 	switch op := runtime.GOOS; op {
 	case "windows":
-		return filepath.Join(os.Getenv("LOCALAPPDATA"), channelName)
+		candidate = filepath.Join(os.Getenv("LOCALAPPDATA"), channelName)
 	case "darwin", "linux":
-		return filepath.Join(Roaming, strings.ToLower(channelName))
+		candidate = filepath.Join(Roaming, strings.ToLower(channelName))
 	default:
+		candidate = ""
+	}
+
+	if Exists(candidate) {
+		return candidate
+	}
+
+	candidate, err := os.UserHomeDir()
+
+	if err != nil {
 		return ""
 	}
+
+	return candidate
 }
 
 func ValidatePath(proposed string) string {

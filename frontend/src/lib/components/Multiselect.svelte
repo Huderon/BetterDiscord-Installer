@@ -1,36 +1,45 @@
 <script lang="ts">
     import Button from "./Button.svelte";
     import {handleKeyboardToggle} from "../stores/controls";
-    import {createEventDispatcher} from "svelte";
+    import type {Snippet} from "svelte";
 
-    export let value;
-    export let description;
-    export let disabled = false;
-    export let checked = false;
+    // export let value: string;
+    // export let description;
+    // export let disabled = false;
+    // export let checked = false;
+    // export let onclick;
+    // export let onchange;
 
-    let checkbox;
-
-    const dispatch = createEventDispatcher();
-    function click() {
-        dispatch("click", value);
+    interface Props {
+        description: string;
+        disabled?: boolean
+        checked?: boolean;
+        onclick?(event: MouseEvent): void;
+        onchange?(event: Event): void;
+        icon?: Snippet;
+        children?: Snippet;
     }
+
+    const {children, icon, description, disabled = false, checked = false, onclick, onchange}: Props = $props();
+
+    let checkbox: HTMLInputElement;
 
 </script>
 
-<label class="check-container" {...$$restProps}>
-    <input bind:this={checkbox} type="checkbox" hidden {disabled} {checked} on:change {value} />
-    <div on:keypress={handleKeyboardToggle(checkbox)} tabindex="0" class="check-item" class:disabled role="listbox">
+<label class="check-container">
+    <input bind:this={checkbox} type="checkbox" hidden {disabled} {checked} {onchange} />
+    <div onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} tabindex="0" class="check-item" class:disabled role="listbox">
         <div class="icon">
-            <slot name="icon" />
+            {@render icon?.()}
         </div>
         <div class="content">
             <h5>
-                <slot>Unknown</slot>
+                {@render children?.()}
             </h5>
             <span title={description}>{description}</span>
         </div>
-        <div class="controls" on:keypress={e => e.stopPropagation()}>
-            <Button type="secondary" on:click={click}>Browse</Button>
+        <div class="controls" role="presentation" onkeypress={e => e.stopPropagation()}>
+            <Button style="secondary" {onclick}>Browse</Button>
         </div>
     </div>
 </label>

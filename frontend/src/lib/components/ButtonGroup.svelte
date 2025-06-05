@@ -1,8 +1,14 @@
-<script lang="ts"></script>
+<script lang="ts">
+    import type {Snippet} from "svelte";
 
-<div class="button-group" {...$$restProps}>
-    <slot></slot>
+    const {children}: {children: Snippet} = $props();
+</script>
+
+
+<div class="button-group">
+    {@render children()}
 </div>
+
 
 <style>
     .button-group {
