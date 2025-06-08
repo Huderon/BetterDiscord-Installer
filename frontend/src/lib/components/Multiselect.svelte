@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from "./Button.svelte";
-    import {handleKeyboardToggle} from "../stores/controls";
+    import {handleKeyboardToggle} from "$lib/utils/handlers";
     import type {Snippet} from "svelte";
 
     // export let value: string;
@@ -20,14 +20,15 @@
         children?: Snippet;
     }
 
-    const {children, icon, description, disabled = false, checked = false, onclick, onchange}: Props = $props();
+    // eslint-disable-next-line prefer-const
+    let {children, icon, description, disabled = false, checked = $bindable(), onclick, onchange}: Props = $props();
 
     let checkbox: HTMLInputElement;
 
 </script>
 
 <label class="check-container">
-    <input bind:this={checkbox} type="checkbox" hidden {disabled} {checked} {onchange} />
+    <input bind:this={checkbox} bind:checked type="checkbox" hidden {disabled} {onchange} />
     <div onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} tabindex="0" class="check-item" class:disabled role="listbox">
         <div class="icon">
             {@render icon?.()}

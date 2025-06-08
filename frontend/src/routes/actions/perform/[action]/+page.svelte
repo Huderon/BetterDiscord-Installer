@@ -1,22 +1,40 @@
 <script lang="ts">
     import ProgressBar from "$lib/components/ProgressBar.svelte";
     import TextDisplay from "$lib/components/TextDisplay.svelte";
-    import logs from "$lib/stores/logs";
-    import debug from "$lib/actions/debug";
-    import {canGoBack, canGoForward, nextPage} from "$lib/stores/navigation";
-    import {action, paths, progress, platforms, status} from "$lib/stores/installation";
+    import app from "$lib/stores/state.svelte";
     import {onDestroy, onMount} from "svelte";
     import {EventsOn as listenFor, EventsOff as unlistenFor} from "@wails/runtime";
-    import {log, reset, succeed, fail} from "$lib/actions/log";
     import {Install as install, Repair as repair, Uninstall as uninstall} from "@backend/Actions";
     import Page from "$lib/components/Page.svelte";
     import type {DiscordChannel} from "$lib/types";
+    import quit from "$lib/utils/quit";
 
 
-    canGoForward.set(false);
-    canGoBack.set(false);
-    status.set("");
+    let status = $state("");
+    let progress = $state(0);
+    let logs = $state<string[]>([]);
 
+    function log(...entry: string[]) {
+        logs.push(...entry);
+    }
+
+    function succeed() {
+        const name = app.action;
+        log("", `${name.charAt(0).toUpperCase() + name.slice(1)} completed!`);
+        progress = 100;
+        status = "success";
+    }
+
+    function fail() {
+        log("", `The ${app.action} seems to have failed. If this problem is recurring, join our discord community for support. https://betterdiscord.app/invite`);
+        status = "error";
+    }
+
+    function reset() {
+        logs = [];
+        progress = 0;
+        status = "";
+    }
 
     onMount(() => {
         listenFor("log", (message) => log(message));
@@ -32,35 +50,30 @@
         unlistenFor("reset");
     });
 
-    const currentAction = $action;
-    logs.set([]);
+    const currentAction = app.action;
 
     const installPaths: Partial<Record<DiscordChannel, string>> = {};
-    for (const channel in $paths) {
-        if ($platforms[channel as DiscordChannel]) installPaths[channel as DiscordChannel] = $paths[channel as DiscordChannel];
+    for (const c in app.corePaths) {
+        const channel = c as DiscordChannel;
+        if (!app.channels[channel]) continue;
+        installPaths[channel] = app.corePaths[channel];
     }
 
+    let active = $state(true);
     log(`Starting ${currentAction}...`);
     log("");
 
     // Run action scripts
-    let actionFn = debug;
+    let actionFn;
     if (currentAction === "install") actionFn = install;
     if (currentAction === "repair") actionFn = repair;
     if (currentAction === "uninstall") actionFn = uninstall;
 
-    actionFn(Object.keys(installPaths), Object.values(installPaths)).then(() => {
-        nextPage.set("");
-        canGoForward.set(true);
-        canGoBack.set(true);
-    });
-
-    // $: ({join} = $logs);
-    // $: indeterminate = $status === "";
+    actionFn?.(Object.keys(installPaths), Object.values(installPaths)).then(() => active = false);
 </script>
 
 
-<Page title="{currentAction[0].toUpperCase()}{currentAction.slice(1)}">
+<Page title="{currentAction[0].toUpperCase()}{currentAction.slice(1)}" previous="/actions/setup/{app.action}" nextAction={quit} nextLabel="Quit" canGoNext={!active} canGoPrevious={!active}>
     {#snippet icon()}
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             {#if currentAction === "install"}
@@ -73,7 +86,6 @@
         </svg>
     {/snippet}
 
-    <!-- eslint-disable-next-line svelte/prefer-destructured-store-props -->
-    <TextDisplay value={$logs.join("\n")} autoscroll />
-    <ProgressBar value={$progress} class={$status} indeterminate={$status === ""} />
+    <TextDisplay value={logs.join("\n")} autoscroll />
+    <ProgressBar value={progress} class={status} indeterminate={status === ""} />
 </Page>

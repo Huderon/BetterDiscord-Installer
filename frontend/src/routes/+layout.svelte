@@ -1,30 +1,46 @@
 <script lang="ts">
     import "focus-visible";
-
-    import {os} from "$lib/stores/installation";
-
-    // import Page from "$lib/containers/Page.svelte";
     import Titlebar from "$lib/components/Titlebar.svelte";
     import Footer from "$lib/components/Footer.svelte";
-    // import Router from "svelte-spa-router";
-    // import routes from "$lib/routes";
+    import {onMount} from "svelte";
+    import {GetPlatform as platform} from "@backend/Backend";
+    import type {OSName} from "$lib/types";
+
 
     const {children} = $props();
+
+    let os = $state<OSName>("windows");
+
+    onMount(async () => {
+        // Disable user zooming
+        window.addEventListener("keydown", (e) => {
+            if ((e.code === "Minus" || e.code === "Equal") && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+            }
+        });
+
+        try {
+            platform().then(osName => os = osName as OSName);
+        }
+        catch {
+            // Not in wails environment
+        }
+    });
 </script>
 
- <!-- eslint-disable-next-line svelte/no-unused-class-name -->
-<div class="main-window platform-{$os || "windows"}">
-    <Titlebar macButtons={$os === "darwin"} />
+
+<div class="main-window" class:platform-darwin={os === "darwin"}>
+    <Titlebar macButtons={os === "darwin"} />
     <main class="installer-body">
         <div class="sections">
-            <!-- <Router {routes} /> -->
-             {#key window.location.pathname}
+             <!-- {#key window.location.pathname} -->
              {@render children()}
-             {/key}
+             <!-- {/key} -->
         </div>
         <Footer />
     </main>
 </div>
+
 
 <style>
     @import url("https://rsms.me/inter/inter.css");

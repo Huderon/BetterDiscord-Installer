@@ -1,32 +1,12 @@
 <script lang="ts">
     import Checkbox from "$lib/components/Checkbox.svelte";
     import TextDisplay from "$lib/components/TextDisplay.svelte";
-    import {canGoBack, canGoForward, nextPage, hasLoaded} from "$lib/stores/navigation";
-    import {hasAgreed} from "$lib/stores/installation";
-    import {onMount} from "svelte";
+    import app from "$lib/stores/state.svelte";
     import Page from "$lib/components/Page.svelte";
-
-    onMount(() => {
-        hasLoaded.set(true); // Use this to avoid initial transition caused by router
-    });
-
-    if (!$hasAgreed) canGoForward.set(false);
-    else canGoForward.set(true);
-    canGoBack.set(false);
-
-    function toggleAgree(event: Event & {target: HTMLInputElement}) {
-        hasAgreed.set(event.target.checked);
-        canGoForward.set(event.target.checked);
-    }
-
-    nextPage.set("/actions");
-
-    const licenseText = __INSTALLER_LICENSE__;
-
 </script>
 
 
-<Page title="License Agreement">
+<Page title="License Agreement" canGoNext={app.eulaAgreed} next="/actions">
      {#snippet icon()}
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M13 6.25a1 1 0 1 1-2 0a1 1 0 0 1 2 0z" />
@@ -34,6 +14,6 @@
         </svg>
     {/snippet}
 
-    <TextDisplay value={licenseText} />
-    <Checkbox checked={$hasAgreed} label="I accept the license agreement." onchange={toggleAgree} />
+    <TextDisplay value={__INSTALLER_LICENSE__} />
+    <Checkbox bind:checked={app.eulaAgreed} label="I accept the license agreement." />
 </Page>

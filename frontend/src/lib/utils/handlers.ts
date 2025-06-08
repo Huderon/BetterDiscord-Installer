@@ -1,9 +1,3 @@
-import {writable} from "svelte/store";
-
-export const radioSelectedIndex = writable(0);
-
-let i = 0;
-
 export function checkItem(item: HTMLInputElement) {
     item.checked = !item.checked;
     const changeEvent = new Event("change");
@@ -16,6 +10,7 @@ export const handleKeyboardToggle = (event: KeyboardEvent, checkbox: HTMLInputEl
     }
 };
 
+let i = 0;
 export const handleArrowKeys = (event: KeyboardEvent, container: HTMLDivElement) => {
     container.focus();
     if (container.hasAttribute("data-selected-index")) i = parseInt(container.getAttribute("data-selected-index")!);

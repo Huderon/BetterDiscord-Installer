@@ -1,56 +1,26 @@
 <script lang="ts">
     import Multiselect from "$lib/components/Multiselect.svelte";
-    import {canGoBack, canGoForward, nextPage} from "$lib/stores/navigation";
-    import {action, platforms, paths} from "$lib/stores/installation";
+    import app from "$lib/stores/state.svelte";
     import {BrowseForDiscord as findDiscordDialog} from "@backend/Dialogs";
 
     import stableUrl from "@assets/images/stable.png";
     import canaryUrl from "@assets/images/canary.png";
     import ptbUrl from "@assets/images/ptb.png";
-    import type {DiscordChannel} from "$lib/types";
+    import {labels, type DiscordChannel} from "$lib/types";
     import Page from "$lib/components/Page.svelte";
 
-    const imageUrls = {
-        stable: stableUrl,
-        canary: canaryUrl,
-        ptb: ptbUrl,
-    };
 
-    const platformLabels: Record<DiscordChannel, string> = {stable: "Discord", ptb: "Discord PTB", canary: "Discord Canary"};
+    const imageUrls: Record<DiscordChannel, string> = {stable: stableUrl, canary: canaryUrl, ptb: ptbUrl};
 
-    if (Object.values($platforms).some(r => r)) canGoForward.set(true);
-    else canGoForward.set(false);
-    canGoBack.set(true);
-    nextPage.set(`/actions/perform/${$action}`);
-
-    function updateInstallButtonState() {
-        if (Object.values($platforms).some(r => r)) canGoForward.set(true);
-        else canGoForward.set(false);
-    }
-
-    function change(channel: DiscordChannel, checked: boolean) {
-        platforms.update(s => {
-            s[channel] = checked;
-            return s;
-        });
-        updateInstallButtonState();
-    }
-
+    const nextLabel = $derived(app.action[0].toUpperCase() + app.action.slice(1));
     async function click(platform: DiscordChannel) {
         const resourcesPath = await findDiscordDialog(platform);
-        paths.update(obj => {
-            obj[platform] = resourcesPath;
-            return obj;
-        });
-        platforms.update(obj => {
-            obj[platform] = Boolean(resourcesPath);
-            return obj;
-        });
-        updateInstallButtonState();
+        app.corePaths[platform] = resourcesPath;
+        app.channels[platform] = Boolean(resourcesPath);
     }
 </script>
 
-<Page title="Choose Discord Versions">
+<Page title="Choose Discord Versions" previous="/actions" next="/actions/perform/{app.action}" {nextLabel} canGoNext={Object.values(app.channels).some(r => r)}>
     {#snippet icon()}
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M17.75 3C19.5449 3 21 4.45507 21 6.25V12.0218C20.5368 11.7253 20.0335 11.4858 19.5 11.3135V8.5H4.5V17.75C4.5 18.7165 5.2835 19.5 6.25 19.5H11.3135C11.4858 20.0335 11.7253 20.5368 12.0218 21H6.25C4.45507 21 3 19.5449 3 17.75V6.25C3 4.45507 4.45507 3 6.25 3H17.75ZM17.75 4.5H6.25C5.2835 4.5 4.5 5.2835 4.5 6.25V7H19.5V6.25C19.5 5.2835 18.7165 4.5 17.75 4.5Z" />
@@ -58,13 +28,12 @@
         </svg>
     {/snippet}
 
-    {#each Object.entries(platformLabels) as [channel, label] (channel)}
+    {#each Object.entries(labels) as [channel, label] (channel)}
         <Multiselect
-            onchange={(e: Event) => change(channel as DiscordChannel, (e.target as HTMLInputElement).checked)}
             onclick={() => click(channel as DiscordChannel)}
-            description={$paths[channel as DiscordChannel] || "Not Found"}
-            checked={!!($paths[channel as DiscordChannel] && $platforms[channel as DiscordChannel])}
-            disabled={!$paths[channel as DiscordChannel]}
+            description={app.corePaths[channel as DiscordChannel] || "Not Found"}
+            bind:checked={app.channels[channel as DiscordChannel]}
+            disabled={!app.corePaths[channel as DiscordChannel]}
         >
             {#snippet icon()}
                 <img src={imageUrls[channel as DiscordChannel]} alt="Platform Icon" />

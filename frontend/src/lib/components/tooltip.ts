@@ -5,11 +5,11 @@ type TooltipColor = "default" | "danger" | "accent";
 type TooltipPosition = "top" | "bottom" | "left" | "right";
 export interface TooltipProps {
     text?: string;
-    color: TooltipColor;
-    position: TooltipPosition;
+    color?: TooltipColor;
+    position?: TooltipPosition;
     spacing?: number;
-    x: number;
-    y: number;
+    x?: number;
+    y?: number;
 }
 
 export function tooltip (node: HTMLElement, {

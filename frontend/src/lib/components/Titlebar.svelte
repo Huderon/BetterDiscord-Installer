@@ -1,5 +1,5 @@
 <script lang="ts">
-    import quit from "../actions/quit";
+    import quit from "$lib/utils/quit";
     import {WindowMinimise as minimize} from "@wails/runtime";
 
     export let macButtons;

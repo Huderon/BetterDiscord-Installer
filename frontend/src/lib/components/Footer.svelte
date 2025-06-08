@@ -2,42 +2,66 @@
     import Button from "./Button.svelte";
     import ButtonGroup from "./ButtonGroup.svelte";
     import SocialLinks from "./SocialLinks.svelte";
-    import {canGoForward, canGoBack, nextPage, state} from "../stores/navigation";
-    import quit from "../actions/quit";
-    import {goto, onNavigate} from "$app/navigation";
+    import {goto} from "$app/navigation";
     import {page} from "$app/state";
     import {base} from "$app/paths";
+    import app from "$lib/stores/state.svelte";
+    import {NavDirection, type NavigationState} from "$lib/types";
+
+    const {
+        next, previous,
+        nextLabel = "Next",
+        previousLabel = "Back",
+        canGoNext = true,
+        canGoPrevious = true,
+        nextAction, previousAction
+    }: NavigationState = $derived(app.navigation);
+
+    $effect(() => {
+        // eslint-disable-next-line no-console
+        console.log({
+            next,
+            previous,
+            nextLabel,
+            previousLabel,
+            canGoNext,
+            canGoPrevious,
+            nextAction,
+            previousAction
+        });
+    });
 
 
-    let nextButtonContent = "Next";
+    const nextDisabled: boolean = $derived.by(() => {
+        if (!canGoNext) return true;
+        if (!nextAction && !next) return true;
+        return false;
+    });
+
+    const previousDisabled: boolean = $derived.by(() => {
+        if (!canGoPrevious) return true;
+        if (!previousAction && !previous) return true;
+        return false;
+    });
+
 
     async function goToNext() {
-        state.direction = 1;
-        if ($nextPage) goto(`${base}${$nextPage}`, page.state);
-        else await quit();
+        app.navigation.direction = NavDirection.FORWARDS;
+        if (typeof nextAction === "function") return nextAction();
+        if (next) goto(`${base}${next}`, page.state);
     }
 
     function goBack() {
-        state.direction = -1;
-        window.history.back();
+        app.navigation.direction = NavDirection.BACKWARDS;
+        if (typeof previousAction === "function") return previousAction();
+        if (previous) goto(`${base}${previous}`, page.state);
     }
 
-    onNavigate(() => {
-        if (window.location.pathname.startsWith("/actions/setup/")) {
-            const action = window.location.pathname.slice(15);
-            const actionText = action[0].toUpperCase() + action.slice(1);
-            nextButtonContent = actionText;
-        }
-        else {
-            nextButtonContent = "Next";
-        }
-    });
-
     function navigatePage(event: KeyboardEvent) {
-        if ((event.key === "ArrowRight" && event.ctrlKey) && $canGoForward) {
+        if ((event.key === "ArrowRight" && event.ctrlKey) && canGoNext) {
             goToNext();
         }
-        else if ((event.key === "ArrowLeft" && event.ctrlKey) && $canGoBack) {
+        else if ((event.key === "ArrowLeft" && event.ctrlKey) && canGoPrevious) {
             goBack();
         }
     }
@@ -49,8 +73,12 @@
 <footer class="install-footer">
     <SocialLinks />
     <ButtonGroup>
-        <Button style="secondary" disabled={!$canGoBack} onclick={goBack}>Back</Button>
-        <Button style="primary" disabled={!$canGoForward} onclick={goToNext}>{#if $nextPage}{nextButtonContent}{:else}Close{/if}</Button>
+        <Button style="secondary" disabled={previousDisabled} onclick={goBack}>
+            {previousLabel}
+        </Button>
+        <Button style="primary" disabled={nextDisabled} onclick={goToNext}>
+            {nextLabel}
+        </Button>
     </ButtonGroup>
 </footer>
 

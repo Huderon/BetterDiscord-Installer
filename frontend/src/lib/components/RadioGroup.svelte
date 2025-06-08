@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {Snippet} from "svelte";
-    import {handleArrowKeys} from "../stores/controls";
+    import {handleArrowKeys} from "$lib/utils/handlers";
 
     const {index = 0, children}: {index?: number, children: Snippet} = $props();
 

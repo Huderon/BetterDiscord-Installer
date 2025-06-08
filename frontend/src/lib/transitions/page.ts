@@ -1,4 +1,4 @@
-import {state} from "../stores/navigation";
+import app from "$lib/stores/state.svelte";
 import {quartInOut} from "svelte/easing";
 
 
@@ -17,7 +17,7 @@ export default function page(node: HTMLElement, {delay = 0, duration = 250, easi
 
     const direction = out ? -1 : 1;
     x = direction * x;
-    x = state.direction * x;
+    x = app.navigation.direction * x;
 
     return {
         delay,
