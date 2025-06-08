@@ -17,20 +17,6 @@
         nextAction, previousAction
     }: NavigationState = $derived(app.navigation);
 
-    $effect(() => {
-        // eslint-disable-next-line no-console
-        console.log({
-            next,
-            previous,
-            nextLabel,
-            previousLabel,
-            canGoNext,
-            canGoPrevious,
-            nextAction,
-            previousAction
-        });
-    });
-
 
     const nextDisabled: boolean = $derived.by(() => {
         if (!canGoNext) return true;
