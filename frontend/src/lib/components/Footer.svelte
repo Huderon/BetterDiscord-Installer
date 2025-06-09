@@ -1,0 +1,81 @@
+<script lang="ts">
+    import Button from "./Button.svelte";
+    import ButtonGroup from "./ButtonGroup.svelte";
+    import SocialLinks from "./SocialLinks.svelte";
+    import {goto} from "$app/navigation";
+    import {page} from "$app/state";
+    import {base} from "$app/paths";
+    import app from "$lib/stores/state.svelte";
+    import {NavDirection, type NavigationState} from "$lib/types";
+
+    const {
+        next, previous,
+        nextLabel = "Next",
+        previousLabel = "Back",
+        canGoNext = true,
+        canGoPrevious = true,
+        nextAction, previousAction
+    }: NavigationState = $derived(app.navigation);
+
+
+    const nextDisabled: boolean = $derived.by(() => {
+        if (!canGoNext) return true;
+        if (!nextAction && !next) return true;
+        return false;
+    });
+
+    const previousDisabled: boolean = $derived.by(() => {
+        if (!canGoPrevious) return true;
+        if (!previousAction && !previous) return true;
+        return false;
+    });
+
+
+    async function goToNext() {
+        app.navigation.direction = NavDirection.FORWARDS;
+        if (typeof nextAction === "function") return nextAction();
+        if (next) goto(`${base}${next}`, page.state);
+    }
+
+    function goBack() {
+        app.navigation.direction = NavDirection.BACKWARDS;
+        if (typeof previousAction === "function") return previousAction();
+        if (previous) goto(`${base}${previous}`, page.state);
+    }
+
+    function navigatePage(event: KeyboardEvent) {
+        if ((event.key === "ArrowRight" && event.ctrlKey) && canGoNext) {
+            goToNext();
+        }
+        else if ((event.key === "ArrowLeft" && event.ctrlKey) && canGoPrevious) {
+            goBack();
+        }
+    }
+
+</script>
+
+<svelte:window on:keydown={navigatePage} />
+
+<footer class="install-footer">
+    <SocialLinks />
+    <ButtonGroup>
+        <Button style="secondary" disabled={previousDisabled} onclick={goBack}>
+            {previousLabel}
+        </Button>
+        <Button style="primary" disabled={nextDisabled} onclick={goToNext}>
+            {nextLabel}
+        </Button>
+    </ButtonGroup>
+</footer>
+
+<style>
+    .install-footer {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex: 0 0 auto;
+        margin-top: 10px;
+    }
+</style>
