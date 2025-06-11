@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"installer/backend/utils"
@@ -119,7 +119,7 @@ func (action *Actions) inject(corePath string) error {
 	indString = strings.ReplaceAll(indString, `\`, "/")
 	indString = indString + "\nmodule.exports = require(\"./core.asar\");"
 
-	if err := os.WriteFile(path.Join(corePath, "index.js"), []byte(indString), 0755); err != nil {
+	if err := os.WriteFile(filepath.Join(corePath, "index.js"), []byte(indString), 0755); err != nil {
 		action.log(fmt.Sprintf("❌ Unable to write index.js in %s", corePath))
 		action.log(fmt.Sprintf("❌ %s", err.Error()))
 		return err
@@ -185,7 +185,7 @@ func (action *Actions) Install(channels []string, corePaths []string) {
 }
 
 func (action *Actions) deleteInjection(channel string, corePath string) error {
-	indexFile := path.Join(corePath, "index.js")
+	indexFile := filepath.Join(corePath, "index.js")
 
 	contents, err := os.ReadFile(indexFile)
 
@@ -227,8 +227,8 @@ func (action *Actions) Uninstall(channels []string, corePaths []string) {
 }
 
 func (action *Actions) disablePlugins(channel string) error {
-	channelFolder := path.Join(utils.Data, channel)
-	pluginsJson := path.Join(channelFolder, "plugins.json")
+	channelFolder := filepath.Join(utils.Data, channel)
+	pluginsJson := filepath.Join(channelFolder, "plugins.json")
 
 	if !utils.Exists(pluginsJson) {
 		action.log(fmt.Sprintf("✅ No plugins enabled for %s", utils.GetChannelName(channel)))

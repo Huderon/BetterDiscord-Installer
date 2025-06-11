@@ -2,9 +2,6 @@ package backend
 
 import (
 	"context"
-	"installer/backend/utils"
-	"os/exec"
-	"runtime"
 )
 
 // var dialogs = NewDialogManager()
@@ -38,25 +35,4 @@ func (d *Backend) SetContext(ctx context.Context) {
 
 func (d *Backend) GetModules() []interface{} {
 	return []interface{}{d.dialogs, d.paths, d.actions}
-}
-
-func (d *Backend) GetPlatform() string {
-	return runtime.GOOS
-}
-
-func (d *Backend) KillProcess(name string, shouldRestart bool) error {
-	exeName := utils.GetProcessExe(name)
-	// fmt.Println(exeName)
-	err := utils.KillProcess(name)
-
-	if err != nil {
-		return err
-	}
-
-	if shouldRestart {
-		cmd := exec.Command(exeName)
-		cmd.Start()
-	}
-
-	return nil
 }
