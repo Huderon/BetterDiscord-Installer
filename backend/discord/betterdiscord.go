@@ -3,7 +3,6 @@ package discord
 import (
 	"installer/backend/utils"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -43,8 +42,8 @@ func CreateBetterDiscord(root string) *BetterDiscord {
 		root:          root,
 		data:          filepath.Join(root, "data"),
 		asar:          filepath.Join(root, "data", "betterdiscord.asar"),
-		plugins:       filepath.Join(root, "data", "plugins"),
-		themes:        filepath.Join(root, "data", "themes"),
+		plugins:       filepath.Join(root, "plugins"),
+		themes:        filepath.Join(root, "themes"),
 		hasDownloaded: false,
 	}
 }
@@ -96,7 +95,7 @@ func (bd *BetterDiscord) download() error {
 
 	resp, err := utils.DownloadFile("https://betterdiscord.app/Download/betterdiscord.asar", bd.asar)
 	if err == nil {
-		version := resp.Header[http.CanonicalHeaderKey("x-bd-version")]
+		version := resp.Header.Get("x-bd-version")
 		log.Printf("✅ Downloaded BetterDiscord version %s from the official website", version)
 		return nil
 	} else {
@@ -140,5 +139,24 @@ func (bd *BetterDiscord) download() error {
 	log.Printf("✅ Downloaded BetterDiscord version %s from GitHub", version)
 	bd.hasDownloaded = true
 
+	return nil
+}
+
+func (bd *BetterDiscord) repair(channel DiscordChannel) error {
+	channelFolder := filepath.Join(utils.Data, channel.String())
+	pluginsJson := filepath.Join(channelFolder, "plugins.json")
+
+	if !utils.Exists(pluginsJson) {
+		log.Printf("✅ No plugins enabled for %s", channel.Name())
+		return nil
+	}
+
+	if err := os.Remove(pluginsJson); err != nil {
+		log.Printf("❌ Unable to remove file %s", pluginsJson)
+		log.Printf("❌ %s", err.Error())
+		return err
+	}
+
+	log.Printf("✅ Plugins disabled for %s", channel.Name())
 	return nil
 }

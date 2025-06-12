@@ -23,6 +23,8 @@ func init() {
 			)
 		}
 	}
+
+	allDiscordInstalls = GetAllInstalls()
 }
 
 func Validate(proposed string) *DiscordInstall {

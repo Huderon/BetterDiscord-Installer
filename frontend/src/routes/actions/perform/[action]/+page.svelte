@@ -37,7 +37,7 @@
     }
 
     onMount(() => {
-        listenFor("log", (message) => log(message));
+        listenFor("log", (message) => log(message.trim()));
         listenFor("success", () => succeed());
         listenFor("failure", () => fail());
         listenFor("reset", reset);
@@ -69,7 +69,7 @@
     if (currentAction === "repair") actionFn = repair;
     if (currentAction === "uninstall") actionFn = uninstall;
 
-    actionFn?.(Object.keys(installPaths), Object.values(installPaths)).then(() => active = false);
+    actionFn?.(Object.values(installPaths)).then(() => active = false);
 </script>
 
 

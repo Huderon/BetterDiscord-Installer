@@ -2,6 +2,11 @@ package backend
 
 import (
 	"context"
+	"fmt"
+	"installer/backend/discord"
+	"log"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // var dialogs = NewDialogManager()
@@ -11,7 +16,6 @@ import (
 type Backend struct {
 	ctx     context.Context
 	dialogs *Dialogs
-	paths   *Paths
 	actions *Actions
 }
 
@@ -19,7 +23,6 @@ type Backend struct {
 func CreateBackend() *Backend {
 	created := &Backend{}
 	created.dialogs = NewDialogManager()
-	created.paths = NewPathManager()
 	created.actions = NewActionsManager()
 	return created
 }
@@ -29,10 +32,20 @@ func CreateBackend() *Backend {
 func (d *Backend) SetContext(ctx context.Context) {
 	d.ctx = ctx
 	d.dialogs.SetContext(ctx)
-	d.paths.SetContext(ctx)
 	d.actions.SetContext(ctx)
 }
 
 func (d *Backend) GetModules() []interface{} {
-	return []interface{}{d.dialogs, d.paths, d.actions}
+	return []interface{}{d.dialogs, d.actions}
+}
+
+func (d *Backend) GetDiscordPath(channel string) string {
+	return discord.GetSuggestedPath(discord.ParseChannel(channel))
+}
+
+func (d *Backend) LogTest(input string) {
+	fmt.Println("LOGTEST")
+	runtime.EventsEmit(d.ctx, "log", "LOGTEST")
+	log.Printf("testing")
+	log.Print(input)
 }

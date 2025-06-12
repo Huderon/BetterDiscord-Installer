@@ -24,6 +24,8 @@ func init() {
 			)
 		}
 	}
+
+	allDiscordInstalls = GetAllInstalls()
 }
 
 /**

@@ -42,6 +42,8 @@ func init() {
 			searchPaths = append(searchPaths, folder)
 		}
 	}
+
+	allDiscordInstalls = GetAllInstalls()
 }
 
 /**

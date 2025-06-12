@@ -3,3 +3,5 @@
 import {context} from '../models';
 
 export function SetContext(arg1:context.Context):Promise<void>;
+
+export function Write(arg1:Array<number>):Promise<number>;

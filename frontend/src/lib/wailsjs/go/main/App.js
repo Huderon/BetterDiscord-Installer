@@ -5,3 +5,7 @@
 export function SetContext(arg1) {
   return window['go']['main']['App']['SetContext'](arg1);
 }
+
+export function Write(arg1) {
+  return window['go']['main']['App']['Write'](arg1);
+}

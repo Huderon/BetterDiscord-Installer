@@ -2,7 +2,8 @@ package backend
 
 import (
 	"context"
-	"installer/backend/utils"
+	"installer/backend/discord"
+	"os"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -24,10 +25,18 @@ func (d *Dialogs) SetContext(ctx context.Context) {
 }
 
 // Greet returns a greeting for the given name
-func (d *Dialogs) BrowseForDiscord(channel string) string {
+func (d *Dialogs) BrowseForDiscord(schannel string) string {
+	var browsePath string
+	browsePath, err := os.UserConfigDir()
+	if err != nil {
+		browsePath = os.Getenv("HOME")
+	}
+
+	channel := discord.ParseChannel(schannel)
+
 	selection, err := runtime.OpenDirectoryDialog(d.ctx, runtime.OpenDialogOptions{
-		Title:                      "Browsing to " + utils.GetChannelName(channel),
-		DefaultDirectory:           utils.BrowsePath(channel),
+		Title:                      "Browsing to " + channel.Name(),
+		DefaultDirectory:           browsePath,
 		ShowHiddenFiles:            true,
 		TreatPackagesAsDirectories: true,
 	})
@@ -36,7 +45,11 @@ func (d *Dialogs) BrowseForDiscord(channel string) string {
 		return ""
 	}
 
-	return utils.ValidatePath(selection)
+	if result := discord.AddCustomPath(selection); result != nil {
+		return result.GetPath()
+	}
+
+	return ""
 }
 
 func (d *Dialogs) ConfirmAction(title string, message string) string {
