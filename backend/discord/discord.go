@@ -32,7 +32,7 @@ func (discord *DiscordInstall) InstallBD() error {
 
 	// Snaps get their own local BD install
 	if discord.isSnap {
-		betterdiscord = GetBetterDiscord(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..", "Betterdiscord")))
+		betterdiscord = GetBetterDiscord(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..")))
 	}
 
 	// Make BetterDiscord folders
@@ -95,7 +95,7 @@ func (discord *DiscordInstall) RepairBD() error {
 
 	// Snaps get their own local BD install
 	if discord.isSnap {
-		betterdiscord = GetBetterDiscord(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..", "Betterdiscord")))
+		betterdiscord = GetBetterDiscord(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..")))
 	}
 
 	if err := betterdiscord.repair(discord.channel); err != nil {

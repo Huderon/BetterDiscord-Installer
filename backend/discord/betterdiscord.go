@@ -32,7 +32,7 @@ func getGlobalInstance() *BetterDiscord {
 	}
 
 	configDir, _ := os.UserConfigDir()
-	globalBetterDiscord = CreateBetterDiscord(filepath.Join(configDir, "BetterDiscord"))
+	globalBetterDiscord = CreateBetterDiscord(configDir)
 
 	return globalBetterDiscord
 }
@@ -48,11 +48,11 @@ func CreateBetterDiscord(root string) *BetterDiscord {
 	}
 }
 
-func GetBetterDiscord(root ...string) *BetterDiscord {
-	if len(root) == 0 {
+func GetBetterDiscord(base ...string) *BetterDiscord {
+	if len(base) == 0 {
 		return getGlobalInstance()
 	}
-	return CreateBetterDiscord(root[0])
+	return CreateBetterDiscord(filepath.Join(base[0], "BetterDiscord"))
 }
 
 func makeDirectory(folder string) error {
@@ -143,7 +143,7 @@ func (bd *BetterDiscord) download() error {
 }
 
 func (bd *BetterDiscord) repair(channel DiscordChannel) error {
-	channelFolder := filepath.Join(utils.Data, channel.String())
+	channelFolder := filepath.Join(bd.data, channel.String())
 	pluginsJson := filepath.Join(channelFolder, "plugins.json")
 
 	if !utils.Exists(pluginsJson) {

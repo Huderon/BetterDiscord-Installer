@@ -45,7 +45,7 @@ func (d *Dialogs) BrowseForDiscord(schannel string) string {
 		return ""
 	}
 
-	if result := discord.AddCustomPath(selection); result != nil {
+	if result := discord.ResolvePath(selection); result != nil {
 		return result.GetPath()
 	}
 

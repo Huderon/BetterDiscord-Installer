@@ -24,7 +24,7 @@ func (action *Actions) SetContext(ctx context.Context) {
 	action.ctx = ctx
 }
 
-func (action *Actions) Install(corePaths ...string) {
+func (action *Actions) Install(corePaths []string) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
@@ -40,7 +40,7 @@ func (action *Actions) Install(corePaths ...string) {
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Actions) Uninstall(corePaths ...string) {
+func (action *Actions) Uninstall(corePaths []string) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
@@ -56,7 +56,7 @@ func (action *Actions) Uninstall(corePaths ...string) {
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Actions) Repair(corePaths ...string) {
+func (action *Actions) Repair(corePaths []string) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
@@ -84,7 +84,7 @@ func (action *Actions) Repair(corePaths ...string) {
 
 	if result == "Yes" {
 		runtime.EventsEmit(action.ctx, "reset")
-		action.Install(corePaths...)
+		action.Install(corePaths)
 	}
 }
 
