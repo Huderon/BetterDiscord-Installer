@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var searchPaths []string
-
 func init() {
 	paths := []string{
 		filepath.Join(os.Getenv("LOCALAPPDATA"), "{channel}"),
@@ -25,38 +23,6 @@ func init() {
 			)
 		}
 	}
-}
-
-func GetAllInstalls() []*DiscordInstall {
-	var installs []*DiscordInstall
-
-	for _, path := range searchPaths {
-		if result := Validate(path); result != nil {
-			installs = append(installs, result)
-		}
-	}
-
-	return installs
-}
-
-func GetChannel(proposed string) DiscordChannel {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
-		for _, channel := range Channels {
-			if folder == strings.ReplaceAll(channel.Name(), " ", "") {
-				return channel
-			}
-		}
-	}
-	return Stable
-}
-
-func GetVersion(proposed string) string {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
-		if strings.Contains(folder, "app-") {
-			return strings.ReplaceAll(folder, "app-", "")
-		}
-	}
-	return ""
 }
 
 func Validate(proposed string) *DiscordInstall {

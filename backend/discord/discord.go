@@ -66,7 +66,11 @@ type DiscordInstall struct {
 	isSnap    bool
 }
 
-func (discord *DiscordInstall) patch() {
+func (discord *DiscordInstall) IsChannel(channel DiscordChannel) bool {
+	return discord.channel == channel
+}
+
+func (discord *DiscordInstall) InstallBD() error {
 	// Gets the global BetterDiscord install
 	betterdiscord := GetBetterDiscord()
 
@@ -76,24 +80,37 @@ func (discord *DiscordInstall) patch() {
 	}
 
 	// Make BetterDiscord folders
+	log.Printf("## Preparing BetterDiscord...")
 	if err := betterdiscord.prepare(); err != nil {
-		return // TODO: do better?
+		return err
 	}
+	log.Printf("✅ BetterDiscord prepared for install")
+	log.Printf("")
 
 	// Download and write betterdiscord.asar
+	log.Printf("## Downloading BetterDiscord...")
 	if err := betterdiscord.download(); err != nil {
-		return // TODO: do better?
+		return err
 	}
+	log.Printf("✅ BetterDiscord downloaded")
+	log.Printf("")
 
 	// Write injection script to discord_desktop_core/index.js
+	log.Printf("## Injecting into Discord...")
 	if err := discord.inject(betterdiscord); err != nil {
-		return // TODO: do better?
+		return err
 	}
+	log.Printf("✅ Injection successsful")
+	log.Printf("")
 
 	// Terminate and restart Discord if possible
+	log.Printf("## Restarting Discord...")
 	if err := discord.restart(); err != nil {
-		return // TODO: do better?
+		return err
 	}
+	log.Printf("")
+
+	return nil
 }
 
 func (discord *DiscordInstall) inject(bd *BetterDiscord) error {

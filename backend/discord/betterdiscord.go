@@ -100,8 +100,9 @@ func (bd *BetterDiscord) download() error {
 		log.Printf("✅ Downloaded BetterDiscord version %s from the official website", version)
 		return nil
 	} else {
-		log.Printf("❌ Failed to download package from official website")
+		log.Printf("❌ Failed to download BetterDiscord from official website")
 		log.Printf("❌ %s", err.Error())
+		log.Printf("")
 		log.Printf("#### Falling back to GitHub...")
 	}
 
@@ -125,13 +126,13 @@ func (bd *BetterDiscord) download() error {
 	var version = apiData.TagName
 
 	if downloadUrl != "" {
-		log.Printf("✅ Found BetterDiscord package: %s", downloadUrl)
+		log.Printf("✅ Found BetterDiscord: %s", downloadUrl)
 	}
 
 	// Download asar into the BD folder
 	_, err = utils.DownloadFile(downloadUrl, bd.asar)
 	if err != nil {
-		log.Printf("❌ Failed to download package from GitHub")
+		log.Printf("❌ Failed to download BetterDiscord from GitHub")
 		log.Printf("❌ %s", err.Error())
 		return err
 	}

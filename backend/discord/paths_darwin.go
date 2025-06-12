@@ -5,13 +5,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 )
-
-var searchPaths []string
-var versionRegex = regexp.MustCompile(`[0-9]+\.[0-9]+\.[0-9]+`)
 
 func init() {
 	config, _ := os.UserConfigDir()
@@ -30,38 +26,12 @@ func init() {
 	}
 }
 
-func GetAllInstalls() []*DiscordInstall {
-	var installs []*DiscordInstall
-
-	for _, path := range searchPaths {
-		if result := Validate(path); result != nil {
-			installs = append(installs, result)
-		}
-	}
-
-	return installs
-}
-
-func GetChannel(proposed string) DiscordChannel {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
-		for _, channel := range Channels {
-			if folder == strings.ReplaceAll(strings.ToLower(channel.Name()), " ", "") {
-				return channel
-			}
-		}
-	}
-	return Stable
-}
-
-func GetVersion(proposed string) string {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
-		if versionRegex.MatchString(folder) {
-			return folder
-		}
-	}
-	return ""
-}
-
+/**
+ * Currently nearly the same as linux validation however
+ * it is kept separate in case of future changes to
+ * either system, it is likely that linux will require
+ * more advanced validation for snap and flatpak.
+ */
 func Validate(proposed string) *DiscordInstall {
 	var finalPath = ""
 	var selected = filepath.Base(proposed)
