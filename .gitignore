@@ -5,3 +5,5 @@ thumbs.db
 .idea/
 app/
 build/bin
+snippets/
+.task/

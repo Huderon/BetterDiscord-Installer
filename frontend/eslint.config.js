@@ -199,7 +199,6 @@ export default ts.config(
         languageOptions: {
             globals: {
                 __INSTALLER_LICENSE__: "readonly",
-                __APP_VERSION__: "readonly"
             }
         }
     }

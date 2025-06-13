@@ -6,6 +6,10 @@ export function CheckForUpdate() {
   return window['go']['main']['App']['CheckForUpdate']();
 }
 
+export function GetVersion() {
+  return window['go']['main']['App']['GetVersion']();
+}
+
 export function SetContext(arg1) {
   return window['go']['main']['App']['SetContext'](arg1);
 }

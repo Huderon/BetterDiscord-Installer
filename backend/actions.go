@@ -87,7 +87,3 @@ func (action *Actions) Repair(corePaths []string) {
 		action.Install(corePaths)
 	}
 }
-
-func (action *Actions) Other(install discord.DiscordInstall, channel discord.DiscordChannel) {
-
-}

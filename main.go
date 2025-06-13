@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"strings"
 
 	"installer/backend"
 	"installer/backend/discord"
@@ -84,12 +85,16 @@ func main() {
 	}
 }
 
-var version = "dev"
+var version = ""
+
+func (a *App) GetVersion() string {
+	return version
+}
 
 func (a *App) CheckForUpdate() {
-	// If the version is "dev", it's a development build,
-	// so we don't check for updates
-	if version == "dev" {
+	// If the version doesn't start with "v" then it's a
+	// development build, so we don't check for updates
+	if !strings.HasPrefix(version, "v") {
 		return
 	}
 
