@@ -1,5 +1,5 @@
 import {channels, createNavState, NavDirection, type AppState} from "$lib/types";
-import {GetDiscordPath} from "@backend/Paths";
+import {GetDiscordPath} from "@backend/Backend";
 
 
 const app = $state<AppState>({

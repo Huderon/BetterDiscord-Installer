@@ -13,12 +13,5 @@ export default defineConfig({
     define: {
         __INSTALLER_LICENSE__: JSON.stringify(license),
         __APP_VERSION__: JSON.stringify(pkg.version)
-    },
-    // resolve: {
-    //     alias: {
-    //         "@assets": path.resolve(__dirname, "./assets"),
-    //         "@wails": path.resolve(__dirname, "./wailsjs/runtime"),
-    //         "@backend": path.resolve(__dirname, "./wailsjs/go/backend"),
-    //     }
-    // }
+    }
 });

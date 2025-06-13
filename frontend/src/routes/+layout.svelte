@@ -3,13 +3,11 @@
     import Titlebar from "$lib/components/Titlebar.svelte";
     import Footer from "$lib/components/Footer.svelte";
     import {onMount} from "svelte";
-    import {GetPlatform as platform} from "@backend/Backend";
-    import type {OSName} from "$lib/types";
 
 
     const {children} = $props();
 
-    let os = $state<OSName>("windows");
+    const isMac = $derived(window.navigator.platform.startsWith("Mac"));
 
     onMount(async () => {
         // Disable user zooming
@@ -18,19 +16,12 @@
                 e.preventDefault();
             }
         });
-
-        try {
-            platform().then(osName => os = osName as OSName);
-        }
-        catch {
-            // Not in wails environment
-        }
     });
 </script>
 
 
-<div class="main-window" class:platform-darwin={os === "darwin"}>
-    <Titlebar macButtons={os === "darwin"} />
+<div class="main-window" class:platform-darwin={isMac}>
+    <Titlebar macButtons={isMac} />
     <main class="installer-body">
         <div class="sections">
              <!-- {#key window.location.pathname} -->
