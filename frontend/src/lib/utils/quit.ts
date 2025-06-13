@@ -1,5 +1,5 @@
 import {Quit as exit} from "@wails/runtime";
-import {ConfirmAction as showMessageBox} from "@backend/Dialogs";
+import {ConfirmAction as showMessageBox} from "@api";
 
 
 export default async function() {

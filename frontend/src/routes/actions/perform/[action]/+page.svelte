@@ -4,7 +4,7 @@
     import app from "$lib/stores/state.svelte";
     import {onDestroy, onMount} from "svelte";
     import {EventsOn as listenFor, EventsOff as unlistenFor} from "@wails/runtime";
-    import {Install as install, Repair as repair, Uninstall as uninstall} from "@backend/Actions";
+    import {Install as install, Repair as repair, Uninstall as uninstall} from "@api";
     import Page from "$lib/components/Page.svelte";
     import type {DiscordChannel} from "$lib/types";
     import quit from "$lib/utils/quit";

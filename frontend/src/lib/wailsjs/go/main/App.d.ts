@@ -7,5 +7,3 @@ export function CheckForUpdate():Promise<void>;
 export function GetVersion():Promise<string>;
 
 export function SetContext(arg1:context.Context):Promise<void>;
-
-export function Write(arg1:Array<number>):Promise<number>;

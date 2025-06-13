@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"installer/types"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -9,10 +10,10 @@ import (
 
 var searchPaths []string
 var versionRegex = regexp.MustCompile(`[0-9]+\.[0-9]+\.[0-9]+`)
-var allDiscordInstalls map[DiscordChannel][]*DiscordInstall
+var allDiscordInstalls map[types.DiscordChannel][]*DiscordInstall
 
-func GetAllInstalls() map[DiscordChannel][]*DiscordInstall {
-	var installs = map[DiscordChannel][]*DiscordInstall{}
+func GetAllInstalls() map[types.DiscordChannel][]*DiscordInstall {
+	var installs = map[types.DiscordChannel][]*DiscordInstall{}
 
 	for _, path := range searchPaths {
 		if result := Validate(path); result != nil {
@@ -34,18 +35,18 @@ func GetVersion(proposed string) string {
 	return ""
 }
 
-func GetChannel(proposed string) DiscordChannel {
+func GetChannel(proposed string) types.DiscordChannel {
 	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
-		for _, channel := range Channels {
+		for _, channel := range types.Channels {
 			if strings.ToLower(folder) == strings.ReplaceAll(strings.ToLower(channel.Name()), " ", "") {
 				return channel
 			}
 		}
 	}
-	return Stable
+	return types.Stable
 }
 
-func GetSuggestedPath(channel DiscordChannel) string {
+func GetSuggestedPath(channel types.DiscordChannel) string {
 	if len(allDiscordInstalls[channel]) > 0 {
 		return allDiscordInstalls[channel][0].corePath
 	}

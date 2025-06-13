@@ -1,7 +1,8 @@
 package discord
 
 import (
-	"installer/backend/utils"
+	"installer/types"
+	"installer/utils"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -31,7 +32,7 @@ func init() {
 		filepath.Join(home, "snap", "{channel-}", "current", ".config", "{channel}"),
 	}
 
-	for _, channel := range Channels {
+	for _, channel := range types.Channels {
 		for _, path := range paths {
 			upper := strings.ReplaceAll(channel.Name(), " ", "")
 			lower := strings.ReplaceAll(strings.ToLower(channel.Name()), " ", "")
