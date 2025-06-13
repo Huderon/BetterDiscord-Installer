@@ -175,8 +175,11 @@ func (discord *DiscordInstall) restart() error {
 	}
 
 	// Set working directory to user home
-	cmd.Path, _ = os.UserHomeDir()
-	if err := cmd.Run(); err != nil {
+	if discord.isFlatpak || discord.isSnap {
+		cmd.Path, _ = os.UserHomeDir()
+	}
+
+	if err := cmd.Start(); err != nil {
 		log.Printf("❌ Unable to restart %s, please do so manually!", discord.channel.Name())
 		log.Printf("❌ %s", err.Error())
 		return err

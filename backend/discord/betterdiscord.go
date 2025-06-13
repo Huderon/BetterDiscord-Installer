@@ -32,7 +32,7 @@ func getGlobalInstance() *BetterDiscord {
 	}
 
 	configDir, _ := os.UserConfigDir()
-	globalBetterDiscord = CreateBetterDiscord(configDir)
+	globalBetterDiscord = GetBetterDiscord(configDir)
 
 	return globalBetterDiscord
 }
