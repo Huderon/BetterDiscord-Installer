@@ -1,5 +1,6 @@
 <script lang="ts">
     import "focus-visible";
+    import "$lib/styles/theme.css";
     import "$lib/styles/global.css";
     import Titlebar from "$lib/components/Titlebar.svelte";
     import Footer from "$lib/components/Footer.svelte";
