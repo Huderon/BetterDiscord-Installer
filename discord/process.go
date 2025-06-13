@@ -1,12 +1,52 @@
-package utils
+package discord
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
 
 	"github.com/shirou/gopsutil/v3/process"
 )
 
-func IsRunning(name string) (bool, error) {
+func (discord *DiscordInstall) restart() error {
+	exeName := discord.getFullExe()
+
+	if running, _ := discord.isRunning(); !running {
+		log.Printf("✅ %s not running", discord.channel.Name())
+		return nil
+	}
+
+	if err := discord.kill(); err != nil {
+		log.Printf("❌ Unable to restart %s, please do so manually!", discord.channel.Name())
+		log.Printf("❌ %s", err.Error())
+		return err
+	}
+
+	// Use binary found in killing process
+	cmd := exec.Command(exeName)
+	if discord.isFlatpak {
+		cmd = exec.Command("flatpak", "run", "com.discordapp."+discord.channel.Exe())
+	} else if discord.isSnap {
+		cmd = exec.Command("snap", "run", discord.channel.Exe())
+	}
+
+	// Set working directory to user home
+	if discord.isFlatpak || discord.isSnap {
+		cmd.Path, _ = os.UserHomeDir()
+	}
+
+	if err := cmd.Start(); err != nil {
+		log.Printf("❌ Unable to restart %s, please do so manually!", discord.channel.Name())
+		log.Printf("❌ %s", err.Error())
+		return err
+	}
+	log.Printf("✅ Restarted %s", discord.channel.Name())
+	return nil
+}
+
+func (discord *DiscordInstall) isRunning() (bool, error) {
+	name := discord.channel.Exe()
 	processes, err := process.Processes()
 
 	// If we can't even list processes, bail out
@@ -33,7 +73,8 @@ func IsRunning(name string) (bool, error) {
 	return false, nil
 }
 
-func KillProcess(name string) error {
+func (discord *DiscordInstall) kill() error {
+	name := discord.channel.Exe()
 	processes, err := process.Processes()
 
 	// If we can't even list processes, bail out
@@ -65,7 +106,9 @@ func KillProcess(name string) error {
 	return nil
 }
 
-func GetProcessExe(name string) string {
+func (discord *DiscordInstall) getFullExe() string {
+	name := discord.channel.Exe()
+
 	var exe = ""
 	processes, err := process.Processes()
 	if err != nil {

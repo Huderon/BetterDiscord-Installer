@@ -1,6 +1,6 @@
 <script lang="ts">
     import quit from "$lib/utils/quit";
-    import {GetVersion} from "$lib/wailsjs/go/main/App";
+    import {GetVersion} from "@app";
     import {WindowMinimise as minimize} from "@wails/runtime";
 
     const {macButtons}: {macButtons: boolean} = $props();

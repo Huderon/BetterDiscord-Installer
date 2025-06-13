@@ -1,7 +1,8 @@
 package discord
 
 import (
-	"installer/backend/utils"
+	"installer/types"
+	"installer/utils"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ func init() {
 		filepath.Join(os.Getenv("PROGRAMDATA"), os.Getenv("USERNAME"), "{channel}"),
 	}
 
-	for _, channel := range Channels {
+	for _, channel := range types.Channels {
 		for _, path := range paths {
 			searchPaths = append(
 				searchPaths,

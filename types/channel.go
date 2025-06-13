@@ -1,11 +1,12 @@
-package discord
+package types
 
 import (
 	"runtime"
 	"strings"
 )
 
-type DiscordChannel int64
+// DiscordChannel represents a Discord release channel (Stable, PTB, Canary)
+type DiscordChannel int
 
 const (
 	Stable DiscordChannel = iota
@@ -13,8 +14,10 @@ const (
 	PTB
 )
 
+// All available Discord channels
 var Channels = []DiscordChannel{Stable, Canary, PTB}
 
+// Used for logging, etc
 func (channel DiscordChannel) String() string {
 	switch channel {
 	case Stable:
@@ -27,10 +30,7 @@ func (channel DiscordChannel) String() string {
 	return ""
 }
 
-func (channel DiscordChannel) TSName() string {
-	return strings.ToUpper(channel.String())
-}
-
+// Used for user display
 func (channel DiscordChannel) Name() string {
 	switch channel {
 	case Stable:
@@ -43,6 +43,7 @@ func (channel DiscordChannel) Name() string {
 	return ""
 }
 
+// Exe returns the executable name for the release channel
 func (channel DiscordChannel) Exe() string {
 	name := channel.Name()
 
@@ -57,6 +58,7 @@ func (channel DiscordChannel) Exe() string {
 	return name
 }
 
+// ParseChannel converts a string input to a DiscordChannel type
 func ParseChannel(input string) DiscordChannel {
 	switch strings.ToLower(input) {
 	case "stable":
@@ -67,4 +69,9 @@ func ParseChannel(input string) DiscordChannel {
 		return PTB
 	}
 	return Stable
+}
+
+// Used by Wails for type serialization
+func (channel DiscordChannel) TSName() string {
+	return strings.ToUpper(channel.String())
 }

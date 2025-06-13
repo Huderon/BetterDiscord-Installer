@@ -10,7 +10,8 @@ const config = {
         alias: {
             "@assets/*": "./src/lib/assets/*",
             "@wails/*": "./src/lib/wailsjs/runtime/*",
-            "@backend/*": "./src/lib/wailsjs/go/backend/*",
+            "@api": "./src/lib/wailsjs/go/api/Controller",
+            "@app": "./src/lib/wailsjs/go/main/App",
         }
     }
 };

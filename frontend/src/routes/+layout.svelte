@@ -1,5 +1,6 @@
 <script lang="ts">
     import "focus-visible";
+    import "$lib/styles/global.css";
     import Titlebar from "$lib/components/Titlebar.svelte";
     import Footer from "$lib/components/Footer.svelte";
     import {onMount} from "svelte";
@@ -34,90 +35,6 @@
 
 
 <style>
-    @import url("https://rsms.me/inter/inter.css");
-
-    :global([data-focus-visible-added]) {
-        box-shadow: 0 0 0 4px var(--accent-faded) !important;
-    }
-
-    :root {
-
-        /* Primary backgrounds */
-        --bg1: #040405;
-        --bg2: #0c0d10;
-        --bg2-alt: #101116;
-        --bg3: #14151b;
-        --bg3-alt: #191a21;
-        --bg4: #20212b;
-
-        /* Text Colors */
-        --text-light: #f1f1f1;
-        --text-normal: #bfc4c9;
-        --text-muted: #95989d;
-        --text-link: #5a88ce;
-
-        /* Accent colors */
-        --accent: #3a71c1;
-        --accent-hover: #2f5b9d;
-        --accent-faded: rgba(58, 113, 193, 0.4);
-
-        /* Danger colors */
-        --danger: #c13a3a;
-        --danger-hover: #992e2e;
-        --danger-faded: rgb(193, 58, 58, 0.4);
-    }
-
-    :global(html),
-    :global(body),
-    :global(#app) {
-        overflow: hidden;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-    }
-
-    :global(*),
-    :global(*::after),
-    :global(*::before) {
-        box-sizing: border-box;
-        -webkit-user-drag: none;
-        font-family: "Inter", sans-serif;
-        user-select: none;
-        outline: none;
-    }
-
-    :global(a) {
-        color: var(--accent);
-        text-decoration: none;
-    }
-
-    :global(::selection) {
-        background-color: var(--accent-faded);
-        color: var(--text-normal);
-    }
-
-    :global(::-webkit-scrollbar) {
-        width: 4px;
-        height: 4px;
-    }
-
-    :global(::-webkit-scrollbar-thumb) {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-    }
-
-    :global(::-webkit-scrollbar-thumb:hover) {
-        background-color: rgba(255, 255, 255, 0.075);
-    }
-
-    :global(::-webkit-scrollbar-thumb:active) {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    :global(::-webkit-scrollbar-corner) {
-        display: none;
-    }
-
     .main-window {
         display: flex;
         flex-direction: column;
@@ -166,16 +83,6 @@
         pointer-events: none;
         mask: radial-gradient(transparent, #000);
         -webkit-mask: radial-gradient(transparent, #000);
-    }
-
-    :global(.page) {
-        flex: 1 1 auto;
-        overflow: visible;
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        width: 100%;
-        height: 100%;
     }
 
     .sections {
