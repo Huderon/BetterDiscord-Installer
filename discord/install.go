@@ -50,7 +50,7 @@ func (discord *DiscordInstall) InstallBD() error {
 	if err := discord.inject(bd); err != nil {
 		return err
 	}
-	log.Printf("✅ Injection successsful")
+	log.Printf("✅ Injection successful")
 	log.Printf("")
 
 	// Terminate and restart Discord if possible
@@ -95,7 +95,7 @@ func (discord *DiscordInstall) RepairBD() error {
 	}
 
 	if err := bd.Repair(discord.channel); err != nil {
-		return nil
+		return err
 	}
 
 	return nil
