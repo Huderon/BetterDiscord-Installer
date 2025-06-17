@@ -16,6 +16,7 @@ func (i *BDInstall) download() error {
 	if err == nil {
 		version := resp.Header.Get("x-bd-version")
 		log.Printf("✅ Downloaded BetterDiscord version %s from the official website", version)
+		i.hasDownloaded = true
 		return nil
 	} else {
 		log.Printf("❌ Failed to download BetterDiscord from official website")
