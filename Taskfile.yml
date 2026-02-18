@@ -4,6 +4,9 @@
 
 version: '3'
 
+env:
+  PKG_CONFIG_PATH: '{{ if contains .WSL_DISTRO_NAME "Fedora" }}/usr/lib64/pkgconfig:/usr/share/pkgconfig{{ end }}'
+
 vars:
   BINARY_NAME: BetterDiscord-Installer
 
@@ -108,13 +111,15 @@ tasks:
   # Requires version to be set in the format vX.Y.Z
   release:*:
     desc: Create a new release
-    deps: [test, build-all]
+    deps: [test]
     vars:
       NEW_VERSION: "{{index .MATCH 0}}"
     cmds:
+      - git tag {{.NEW_VERSION}}
       - task: generate-changelog
         vars: { VERSION: "{{.NEW_VERSION}}" }
-      - git tag {{.NEW_VERSION}}
+      - task: build-all
+        vars: { VERSION: "{{.NEW_VERSION}}" }
       - git push origin {{.NEW_VERSION}}
 
   generate-changelog:

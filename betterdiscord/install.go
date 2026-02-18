@@ -2,6 +2,9 @@ package betterdiscord
 
 import (
 	"installer/types"
+	"installer/utils"
+	"installer/wsl"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -61,6 +64,27 @@ func (i *BDInstall) Repair(channel types.DiscordChannel) error {
 	return i.repair(channel)
 }
 
+func (i *BDInstall) IsAsarInstalled() bool {
+	return utils.Exists(i.asar)
+}
+
+// RemoveAll deletes the BetterDiscord installation directory and all contents.
+func (i *BDInstall) RemoveAll() error {
+	if !utils.Exists(i.root) {
+		log.Printf("✅ BetterDiscord folder not found: %s\n", i.root)
+		return nil
+	}
+
+	if err := os.RemoveAll(i.root); err != nil {
+		log.Printf("❌ Failed to remove BetterDiscord folder: %s\n", i.root)
+		log.Printf("   %s\n", err.Error())
+		return err
+	}
+
+	log.Printf("✅ Removed BetterDiscord folder: %s\n", i.root)
+	return nil
+}
+
 var lock = &sync.Mutex{}
 var globalInstance *BDInstall
 
@@ -76,8 +100,18 @@ func GetInstallation(base ...string) *BDInstall {
 			return globalInstance
 		}
 
+		// Default to user config directory
 		configDir, _ := os.UserConfigDir()
-		globalInstance = New(configDir)
+
+		// Handle WSL with Windows home directory
+		if wsl.IsWSL() {
+			winHome, err := wsl.WindowsHome()
+			if err == nil && winHome != "" {
+				configDir = filepath.Join(winHome, "AppData", "Roaming")
+			}
+		}
+
+		globalInstance = GetInstallation(configDir)
 
 		return globalInstance
 	}
@@ -87,10 +121,11 @@ func GetInstallation(base ...string) *BDInstall {
 
 func New(root string) *BDInstall {
 	return &BDInstall{
-		root:    root,
-		data:    filepath.Join(root, "data"),
-		asar:    filepath.Join(root, "data", "betterdiscord.asar"),
-		plugins: filepath.Join(root, "plugins"),
-		themes:  filepath.Join(root, "themes"),
+		root:          root,
+		data:          filepath.Join(root, "data"),
+		asar:          filepath.Join(root, "data", "betterdiscord.asar"),
+		plugins:       filepath.Join(root, "plugins"),
+		themes:        filepath.Join(root, "themes"),
+		hasDownloaded: false,
 	}
 }

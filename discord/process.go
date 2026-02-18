@@ -13,38 +13,45 @@ func (discord *DiscordInstall) restart() error {
 	exeName := discord.getFullExe()
 
 	if running, _ := discord.isRunning(); !running {
-		log.Printf("✅ %s not running", discord.channel.Name())
+		log.Printf("✅ %s is not running; skipping restart.\n", discord.Channel.Name())
 		return nil
 	}
 
 	if err := discord.kill(); err != nil {
-		log.Printf("❌ Unable to restart %s, please do so manually!", discord.channel.Name())
-		log.Printf("❌ %s", err.Error())
+		log.Printf("❌ Unable to restart %s, please do so manually.\n", discord.Channel.Name())
+		log.Printf("   %s\n", err.Error())
 		return err
 	}
 
-	// Use binary found in killing process
-	cmd := exec.Command(exeName)
-	if discord.isFlatpak {
-		cmd = exec.Command("flatpak", "run", "com.discordapp."+discord.channel.Exe())
-	} else if discord.isSnap {
-		cmd = exec.Command("snap", "run", discord.channel.Exe())
+	// Determine command based on installation type
+	var cmd *exec.Cmd
+	if discord.IsFlatpak {
+		cmd = exec.Command("flatpak", "run", "com.discordapp."+discord.Channel.Exe())
+	} else if discord.IsSnap {
+		cmd = exec.Command("snap", "run", discord.Channel.Exe())
+	} else {
+		// Use binary found in killing process for non-Flatpak/Snap installs
+		if exeName == "" {
+			log.Printf("❌ Unable to restart %s, please do so manually.\n", discord.Channel.Name())
+			return fmt.Errorf("could not determine executable path for %s", discord.Channel.Name())
+		}
+		cmd = exec.Command(exeName)
 	}
 
 	// Set working directory to user home
 	cmd.Dir, _ = os.UserHomeDir()
 
 	if err := cmd.Start(); err != nil {
-		log.Printf("❌ Unable to restart %s, please do so manually!", discord.channel.Name())
-		log.Printf("❌ %s", err.Error())
+		log.Printf("❌ Unable to restart %s, please do so manually.\n", discord.Channel.Name())
+		log.Printf("   %s\n", err.Error())
 		return err
 	}
-	log.Printf("✅ Restarted %s", discord.channel.Name())
+	log.Printf("✅ Restarted %s\n", discord.Channel.Name())
 	return nil
 }
 
 func (discord *DiscordInstall) isRunning() (bool, error) {
-	name := discord.channel.Exe()
+	name := discord.Channel.Exe()
 	processes, err := process.Processes()
 
 	// If we can't even list processes, bail out
@@ -52,7 +59,7 @@ func (discord *DiscordInstall) isRunning() (bool, error) {
 		return false, fmt.Errorf("could not list processes")
 	}
 
-	// Search for desired processe(s)
+	// Search for desired process(es)
 	for _, p := range processes {
 		n, err := p.Name()
 
@@ -72,7 +79,7 @@ func (discord *DiscordInstall) isRunning() (bool, error) {
 }
 
 func (discord *DiscordInstall) kill() error {
-	name := discord.channel.Exe()
+	name := discord.Channel.Exe()
 	processes, err := process.Processes()
 
 	// If we can't even list processes, bail out
@@ -80,7 +87,7 @@ func (discord *DiscordInstall) kill() error {
 		return fmt.Errorf("could not list processes")
 	}
 
-	// Search for desired processe(s)
+	// Search for desired process(es)
 	for _, p := range processes {
 		n, err := p.Name()
 
@@ -105,7 +112,7 @@ func (discord *DiscordInstall) kill() error {
 }
 
 func (discord *DiscordInstall) getFullExe() string {
-	name := discord.channel.Exe()
+	name := discord.Channel.Exe()
 
 	var exe = ""
 	processes, err := process.Processes()
