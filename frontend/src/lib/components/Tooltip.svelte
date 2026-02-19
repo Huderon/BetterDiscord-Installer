@@ -7,7 +7,7 @@
     let element: HTMLDivElement;
 
 
-    export const getElement = () => element;
+    export const getElement = (): HTMLDivElement => element;
     export const setCoords = (newx: number, newy: number) => {
         x = newx;
         y = newy;

@@ -6,7 +6,7 @@ export const channels = ["stable", "canary", "ptb"] as const;
 export const labels = {stable: "Discord", ptb: "Discord PTB", canary: "Discord Canary"} as const;
 export const actions: InstallerAction[] = ["install", "repair", "uninstall"] as const;
 
-export enum NavDirection {FORWARDS = 1, BACKWARDS = -1};
+export enum NavDirection {FORWARDS = 1, BACKWARDS = -1}
 
 export interface NavigationState {
     direction: NavDirection;
@@ -16,8 +16,8 @@ export interface NavigationState {
     previousLabel?: string;
     canGoNext?: boolean;
     canGoPrevious?: boolean;
-    nextAction?(): void;
-    previousAction?(): void;
+    nextAction?: () => void;
+    previousAction?: () => void;
 }
 
 export const createNavState = (state?: Partial<NavigationState>) => {

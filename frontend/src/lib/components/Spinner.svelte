@@ -8,7 +8,7 @@
         const circumference = Math.PI * (parseInt(circle.getAttribute("r")!) * 2);
         if (value < 0) value = 0;
         if (value > 100) value = 100;
-        circle!.style.strokeDashoffset = `${((100 - value) / 100) * circumference}`;
+        circle.style.strokeDashoffset = `${((100 - value) / 100) * circumference}`;
     }
 
     onMount(updateValue);

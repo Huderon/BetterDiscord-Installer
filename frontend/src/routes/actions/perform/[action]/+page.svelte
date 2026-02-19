@@ -37,7 +37,7 @@
     }
 
     onMount(() => {
-        listenFor("log", (message) => log(message.trim()));
+        listenFor("log", (message: string) => log(message.trim()));
         listenFor("success", () => succeed());
         listenFor("failure", () => fail());
         listenFor("reset", reset);
@@ -64,12 +64,12 @@
     log("");
 
     // Run action scripts
-    let actionFn;
+    let actionFn: ((paths: string[]) => Promise<void>) | undefined;
     if (currentAction === "install") actionFn = install;
     if (currentAction === "repair") actionFn = repair;
     if (currentAction === "uninstall") actionFn = uninstall;
 
-    actionFn?.(Object.values(installPaths)).then(() => active = false);
+    void actionFn?.(Object.values(installPaths)).then(() => active = false);
 </script>
 
 

@@ -34,21 +34,23 @@
     async function goToNext() {
         app.navigation.direction = NavDirection.FORWARDS;
         if (typeof nextAction === "function") return nextAction();
-        if (next) goto(`${base}${next}`, page.state);
+        // eslint-disable-next-line svelte/no-navigation-without-resolve
+        if (next) await goto(`${base}${next}`, page.state);
     }
 
-    function goBack() {
+    async function goBack() {
         app.navigation.direction = NavDirection.BACKWARDS;
         if (typeof previousAction === "function") return previousAction();
-        if (previous) goto(`${base}${previous}`, page.state);
+        // eslint-disable-next-line svelte/no-navigation-without-resolve
+        if (previous) await goto(`${base}${previous}`, page.state);
     }
 
-    function navigatePage(event: KeyboardEvent) {
+    async function navigatePage(event: KeyboardEvent) {
         if ((event.key === "ArrowRight" && event.ctrlKey) && canGoNext) {
-            goToNext();
+            await goToNext();
         }
         else if ((event.key === "ArrowLeft" && event.ctrlKey) && canGoPrevious) {
-            goBack();
+            await goBack();
         }
     }
 

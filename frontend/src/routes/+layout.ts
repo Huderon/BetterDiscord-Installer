@@ -6,6 +6,8 @@ import {EventsOn} from "@wails/runtime";
 export const ssr = false;
 
 if (dev) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (window as any).goto = goto;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (window as any).listen = EventsOn;
 }

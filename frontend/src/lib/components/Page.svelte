@@ -12,9 +12,6 @@
         title?: string;
     }
 
-    // TODO: remove when the PR lands in eslint-plugin-svelte
-    // the below is not actually an issue with our code
-    // eslint-disable-next-line svelte/valid-compile
     const {children, icon, title = "BetterDiscord", ...footer}: Props = $props();
 
 
