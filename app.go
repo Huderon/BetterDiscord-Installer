@@ -43,7 +43,7 @@ func (a *App) CheckForUpdate() {
 
 	// If the current version is greater than or equal
 	// to the latest version, no update is needed
-	if version >= apiData.TagName {
+	if utils.CompareVersions(version, apiData.TagName) >= 0 {
 		return
 	}
 
