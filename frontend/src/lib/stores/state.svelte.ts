@@ -14,7 +14,8 @@ const app = $state<AppState>({
 
 try {
     for (const channel of channels) {
-        GetDiscordPath(channel).then(path => app.corePaths[channel] = path);
+        // eslint-disable-next-line new-cap
+        void GetDiscordPath(channel).then(path => app.corePaths[channel] = path);
     }
 }
 catch {

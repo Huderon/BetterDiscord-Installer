@@ -5,7 +5,7 @@
     interface Props {
         checked: boolean;
         label?: string;
-        onchange?(e: Event): void;
+        onchange?: (e: Event) => void;
     }
 
     // eslint-disable-next-line prefer-const

@@ -16,7 +16,7 @@
     let copyInputContainer: HTMLDivElement | undefined = $state();
     let copyButtonActive = $state(false);
     let copyButtonVisible = $state(false);
-    let shouldAutoscroll: boolean = autoscroll;
+    let shouldAutoscroll: boolean = $derived(autoscroll);
 
     // Copy button
     function copyDisplayContents() {
@@ -41,7 +41,7 @@
         if (!value || !autoscroll) return;
         shouldAutoscroll = !!(scroller && (scroller.offsetHeight + scroller.scrollTop) > (scroller.scrollHeight - 20));
         if (!shouldAutoscroll) return;
-        tick().then(() => {
+        void tick().then(() => {
             scroller?.scrollTo(0, scroller?.scrollHeight);
         });
     });

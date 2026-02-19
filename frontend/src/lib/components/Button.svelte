@@ -5,8 +5,8 @@
         style?: "primary" | "secondary";
         tabindex?: number|string;
         disabled?: boolean;
-        onkeypress?(event: KeyboardEvent): void;
-        onclick?(event: MouseEvent): void;
+        onkeypress?: (event: KeyboardEvent) => void;
+        onclick?: (event: MouseEvent) => void;
         children: Snippet;
     }
 

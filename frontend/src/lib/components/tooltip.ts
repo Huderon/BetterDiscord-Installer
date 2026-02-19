@@ -12,18 +12,18 @@ export interface TooltipProps {
     y?: number;
 }
 
-export function tooltip (node: HTMLElement, {
-        text = "",
-        color = "default",
-        position = "top",
-        spacing = 3,
-        x = 0,
-        y = 0
-    }: TooltipProps) {
+export function tooltip(node: HTMLElement, {
+    text = "",
+    color = "default",
+    position = "top",
+    spacing = 3,
+    x = 0,
+    y = 0
+}: TooltipProps) {
 
     let isComponentRendered = false;
     let component: ReturnType<typeof Tooltip>;
-    let tooltipDOM: HTMLElement;
+    let tooltipDOM: HTMLDivElement;
 
     async function renderTooltip() {
 
@@ -53,6 +53,8 @@ export function tooltip (node: HTMLElement, {
         // Need to await a tick in order for the component to be built and populated
         await tick();
 
+        // TODO: fix eslint?
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
         tooltipDOM = component.getElement();
 
         // Tooltip container
@@ -69,24 +71,28 @@ export function tooltip (node: HTMLElement, {
         // Tooltip Positioning
         if (component) {
             if (position === "top") {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 component.setCoords(
                     node.getBoundingClientRect().left + (node.offsetWidth / 2) - (tooltipDOM.offsetWidth / 2),
                     (node.getBoundingClientRect().top - tooltipDOM.offsetHeight - 5) - spacing
                 );
             }
             else if (position === "bottom") {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 component.setCoords(
                     node.getBoundingClientRect().left + (node.offsetWidth / 2) - (tooltipDOM.offsetWidth / 2),
                     (node.getBoundingClientRect().bottom + 5) + spacing
                 );
             }
             else if (position === "left") {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 component.setCoords(
                     (node.getBoundingClientRect().left - tooltipDOM.offsetWidth - 5) - spacing,
                     node.getBoundingClientRect().top + (node.offsetHeight / 2) - (tooltipDOM.offsetHeight / 2)
                 );
             }
             else if (position === "right") {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 component.setCoords(
                     (node.getBoundingClientRect().left + node.offsetWidth + 5) + spacing,
                     node.getBoundingClientRect().top + (node.offsetHeight / 2) - (tooltipDOM.offsetHeight / 2)
@@ -106,7 +112,7 @@ export function tooltip (node: HTMLElement, {
         if (isComponentRendered) {
 
             // Remove component
-            unmount(component);
+            void unmount(component);
             tooltipsLayer?.remove();
 
             // Tooltip is no longer rendered, update our check
@@ -115,12 +121,12 @@ export function tooltip (node: HTMLElement, {
     }
 
     // Add listeners for rendering/unrendering
-    node.addEventListener("mouseenter", renderTooltip);
+    node.addEventListener("mouseenter", () => void renderTooltip());
     node.addEventListener("mouseleave", unmountTooltip);
-    node.addEventListener("focus", renderTooltip);
+    node.addEventListener("focus", () => void renderTooltip());
     node.addEventListener("blur", unmountTooltip);
     node.childNodes.forEach(child => {
-        child.addEventListener("focus", renderTooltip);
+        child.addEventListener("focus", () => void renderTooltip());
     });
     node.childNodes.forEach(child => {
         child.addEventListener("blur", unmountTooltip);
@@ -128,11 +134,11 @@ export function tooltip (node: HTMLElement, {
 
     return {
         destroy() {
-            node.removeEventListener("mouseenter", renderTooltip);
+            node.removeEventListener("mouseenter", () => void renderTooltip());
             node.removeEventListener("mouseleave", unmountTooltip);
-            node.removeEventListener("focus", renderTooltip);
+            node.removeEventListener("focus", () => void renderTooltip());
             node.childNodes.forEach(child => {
-                child.removeEventListener("focus", renderTooltip);
+                child.removeEventListener("focus", () => void renderTooltip());
             });
             node.childNodes.forEach(child => {
                 child.removeEventListener("blur", unmountTooltip);

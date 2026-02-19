@@ -4,14 +4,14 @@
     import "$lib/styles/global.css";
     import Titlebar from "$lib/components/Titlebar.svelte";
     import Footer from "$lib/components/Footer.svelte";
-    import {onMount} from "svelte";
+    import {onMount, type Snippet} from "svelte";
 
 
-    const {children} = $props();
+    const {children}: {children: Snippet} = $props();
 
     const isMac = $derived(window.navigator.platform.startsWith("Mac"));
 
-    onMount(async () => {
+    onMount(() => {
         // Disable user zooming
         window.addEventListener("keydown", (e) => {
             if ((e.code === "Minus" || e.code === "Equal") && (e.ctrlKey || e.metaKey)) {

@@ -14,8 +14,8 @@
         description: string;
         disabled?: boolean
         checked?: boolean;
-        onclick?(event: MouseEvent): void;
-        onchange?(event: Event): void;
+        onclick?: (event: MouseEvent) => void;
+        onchange?: (event: Event) => void;
         icon?: Snippet;
         children?: Snippet;
     }

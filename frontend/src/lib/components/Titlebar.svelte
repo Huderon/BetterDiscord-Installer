@@ -6,7 +6,8 @@
     const {macButtons}: {macButtons: boolean} = $props();
 
     let version = $state("");
-    GetVersion().then((v) => version = v);
+    // eslint-disable-next-line new-cap
+    void GetVersion().then((v) => version = v);
 </script>
 
 <header class="titlebar" class:type-mac={macButtons === true} class:type-standard={macButtons !== true}>

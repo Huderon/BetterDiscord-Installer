@@ -13,21 +13,21 @@ var versionRegex = regexp.MustCompile(`[0-9]+\.[0-9]+\.[0-9]+`)
 var allDiscordInstalls map[types.DiscordChannel][]*DiscordInstall
 
 func GetAllInstalls() map[types.DiscordChannel][]*DiscordInstall {
-	var installs = map[types.DiscordChannel][]*DiscordInstall{}
+	allDiscordInstalls = map[types.DiscordChannel][]*DiscordInstall{}
 
 	for _, path := range searchPaths {
 		if result := Validate(path); result != nil {
-			installs[result.channel] = append(installs[result.channel], result)
+			allDiscordInstalls[result.Channel] = append(allDiscordInstalls[result.Channel], result)
 		}
 	}
 
 	sortInstalls()
 
-	return installs
+	return allDiscordInstalls
 }
 
 func GetVersion(proposed string) string {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
+	for folder := range strings.SplitSeq(proposed, string(filepath.Separator)) {
 		if version := versionRegex.FindString(folder); version != "" {
 			return version
 		}
@@ -36,7 +36,7 @@ func GetVersion(proposed string) string {
 }
 
 func GetChannel(proposed string) types.DiscordChannel {
-	for _, folder := range strings.Split(proposed, string(filepath.Separator)) {
+	for folder := range strings.SplitSeq(proposed, string(filepath.Separator)) {
 		for _, channel := range types.Channels {
 			if strings.ToLower(folder) == strings.ReplaceAll(strings.ToLower(channel.Name()), " ", "") {
 				return channel
@@ -48,7 +48,7 @@ func GetChannel(proposed string) types.DiscordChannel {
 
 func GetSuggestedPath(channel types.DiscordChannel) string {
 	if len(allDiscordInstalls[channel]) > 0 {
-		return allDiscordInstalls[channel][0].corePath
+		return allDiscordInstalls[channel][0].CorePath
 	}
 	return ""
 }
@@ -60,12 +60,12 @@ func AddCustomPath(proposed string) *DiscordInstall {
 	}
 
 	// Check if this already exists in our list and return reference
-	index := slices.IndexFunc(allDiscordInstalls[result.channel], func(d *DiscordInstall) bool { return d.corePath == result.corePath })
+	index := slices.IndexFunc(allDiscordInstalls[result.Channel], func(d *DiscordInstall) bool { return d.CorePath == result.CorePath })
 	if index >= 0 {
-		return allDiscordInstalls[result.channel][index]
+		return allDiscordInstalls[result.Channel][index]
 	}
 
-	allDiscordInstalls[result.channel] = append(allDiscordInstalls[result.channel], result)
+	allDiscordInstalls[result.Channel] = append(allDiscordInstalls[result.Channel], result)
 
 	sortInstalls()
 
@@ -74,7 +74,7 @@ func AddCustomPath(proposed string) *DiscordInstall {
 
 func ResolvePath(proposed string) *DiscordInstall {
 	for channel := range allDiscordInstalls {
-		index := slices.IndexFunc(allDiscordInstalls[channel], func(d *DiscordInstall) bool { return d.corePath == proposed })
+		index := slices.IndexFunc(allDiscordInstalls[channel], func(d *DiscordInstall) bool { return d.CorePath == proposed })
 		if index >= 0 {
 			return allDiscordInstalls[channel][index]
 		}
@@ -88,9 +88,9 @@ func sortInstalls() {
 	for channel := range allDiscordInstalls {
 		slices.SortFunc(allDiscordInstalls[channel], func(a, b *DiscordInstall) int {
 			switch {
-			case a.version > b.version:
+			case a.Version > b.Version:
 				return -1
-			case b.version > a.version:
+			case b.Version > a.Version:
 				return 1
 			}
 			return 0

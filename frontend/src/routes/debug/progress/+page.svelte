@@ -6,8 +6,10 @@
     import {onMount} from "svelte";
 
     onMount(() => {
-        WindowSetSize(1100, 700);
-        setTimeout(() => WindowCenter(), 100);
+        // eslint-disable-next-line new-cap
+        void WindowSetSize(1100, 700);
+        // eslint-disable-next-line new-cap
+        setTimeout(() => void WindowCenter(), 100);
     });
 
     let progress = $state(0);

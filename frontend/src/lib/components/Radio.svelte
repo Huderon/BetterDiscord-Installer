@@ -4,7 +4,7 @@
     interface Props {
         group: string;
         value: string;
-        onchange?(event: Event): void;
+        onchange?: (event: Event) => void;
         children?: Snippet;
     }
 

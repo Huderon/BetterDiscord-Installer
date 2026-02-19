@@ -8,74 +8,64 @@ import (
 )
 
 type DiscordInstall struct {
-	corePath  string               `json:"corePath"`
-	channel   types.DiscordChannel `json:"channel"`
-	version   string               `json:"version"`
-	isFlatpak bool                 `json:"isFlatpak"`
-	isSnap    bool                 `json:"isSnap"`
-}
-
-func (discord *DiscordInstall) GetPath() string {
-	return discord.corePath
+	CorePath  string                `json:"corePath"`
+	Channel   types.DiscordChannel  `json:"channel"`
+	Version   string                `json:"version"`
+	IsFlatpak bool                  `json:"isFlatpak"`
+	IsSnap    bool                  `json:"isSnap"`
 }
 
 // InstallBD installs BetterDiscord into this Discord installation
 func (discord *DiscordInstall) InstallBD() error {
-	// Gets the global BetterDiscord install
-	bd := betterdiscord.GetInstallation()
-
-	// Snaps get their own local BD install
-	if discord.isSnap {
-		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..")))
-	}
+	bd := discord.GetBetterDiscordInstall()
 
 	// Make BetterDiscord folders
-	log.Printf("## Preparing BetterDiscord...")
+	log.Println("🛠 Preparing BetterDiscord...")
 	if err := bd.Prepare(); err != nil {
 		return err
 	}
-	log.Printf("✅ BetterDiscord prepared for install")
-	log.Printf("")
+	log.Println("✅ BetterDiscord prepared for install")
+	log.Println("")
 
 	// Download and write betterdiscord.asar
-	log.Printf("## Downloading BetterDiscord...")
+	log.Println("📥 Downloading BetterDiscord...")
 	if err := bd.Download(); err != nil {
 		return err
 	}
-	log.Printf("✅ BetterDiscord downloaded")
-	log.Printf("")
+	log.Println("✅ BetterDiscord downloaded")
+	log.Println("")
 
 	// Write injection script to discord_desktop_core/index.js
-	log.Printf("## Injecting into Discord...")
+	log.Println("🔌 Injecting into Discord...")
 	if err := discord.inject(bd); err != nil {
 		return err
 	}
-	log.Printf("✅ Injection successful")
-	log.Printf("")
+	log.Println("✅ Injection successful")
+	log.Println("")
 
 	// Terminate and restart Discord if possible
-	log.Printf("## Restarting %s...", discord.channel.Name())
+	log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
 	if err := discord.restart(); err != nil {
 		return err
 	}
-	log.Printf("")
+	log.Println("")
 
 	return nil
 }
 
 // UninstallBD removes BetterDiscord from this Discord installation
 func (discord *DiscordInstall) UninstallBD() error {
-	log.Printf("## Removing injection...")
+	log.Println("🧹 Removing injection...")
 	if err := discord.uninject(); err != nil {
 		return err
 	}
-	log.Printf("")
+	log.Println("")
 
-	log.Printf("## Restarting %s...", discord.channel.Name())
+	log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
 	if err := discord.restart(); err != nil {
 		return err
 	}
-	log.Printf("")
+	log.Println("")
 
 	return nil
 }
@@ -90,13 +80,25 @@ func (discord *DiscordInstall) RepairBD() error {
 	bd := betterdiscord.GetInstallation()
 
 	// Snaps get their own local BD install
-	if discord.isSnap {
-		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.corePath, "..", "..", "..", "..")))
+	if discord.IsSnap {
+		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
 	}
 
-	if err := bd.Repair(discord.channel); err != nil {
+	if err := bd.Repair(discord.Channel); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (discord *DiscordInstall) GetBetterDiscordInstall() *betterdiscord.BDInstall {
+	// Gets the global BetterDiscord install
+	bd := betterdiscord.GetInstallation()
+
+	// Snaps get their own local BD install
+	if discord.IsSnap {
+		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
+	}
+
+	return bd
 }
