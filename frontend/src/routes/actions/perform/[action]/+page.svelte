@@ -5,9 +5,9 @@
     import {onDestroy, onMount} from "svelte";
     import {EventsOn as listenFor, EventsOff as unlistenFor} from "@wails/runtime";
     import {goto} from "$app/navigation";
-    import {Install as install, Repair as repair, Uninstall as uninstall} from "@api";
+    import {Install as install, Repair as repair, Uninstall as uninstall} from "$lib/wailsjs/go/api/Controller";
     import Page from "$lib/components/Page.svelte";
-    import type {ActionOptions, DiscordChannel} from "$lib/types";
+    import type {DiscordChannel} from "$lib/types";
     import quit from "$lib/utils/quit";
 
 
@@ -40,10 +40,8 @@
     function handleNavigate(payload: {action?: "install" | "repair" | "uninstall"}) {
         if (!payload?.action) return;
         app.action = payload.action;
-        // TODO: This is hacky, we can do better.
-        // also TODO: comprehensive usage of resolve
-        // eslint-disable-next-line svelte/no-navigation-without-resolve, svelte/no-goto-without-base
-        void goto(`/actions/configure/${payload.action}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve, svelte/no-goto-without-base
+    void goto(`/actions/configure/${payload.action}`);
     }
 
     onMount(() => {
@@ -71,37 +69,19 @@
         installPaths[channel] = app.corePaths[channel];
     }
 
-    // const appOptions = $derived((app as unknown as {
-    //     options: {
-    //         install: {restartDiscord: boolean};
-    //         repair: {disablePlugins: boolean};
-    //         uninstall: {fullUninstall: boolean};
-    //     };
-    // }).options);
-
     let active = $state(true);
     log(`Starting ${currentAction}...`);
     log("");
 
-    // TODO: this is really gross, we should be able to do better than this.
     // Run action scripts
-    let actionFn: ((paths: string[], options: ActionOptions) => Promise<void>) | undefined;
-    let actionOptions: ActionOptions | undefined;
     if (currentAction === "install") {
-        actionFn = install as (paths: string[], options: ActionOptions) => Promise<void>;
-        actionOptions = app.options.install;
+         void (install(Object.values(installPaths), app.options.install)).then(() => active = false);
     }
     if (currentAction === "repair") {
-        actionFn = repair as (paths: string[], options: ActionOptions) => Promise<void>;
-        actionOptions = app.options.repair;
+        void (repair(Object.values(installPaths), app.options.repair)).then(() => active = false);
     }
     if (currentAction === "uninstall") {
-        actionFn = uninstall as (paths: string[], options: ActionOptions) => Promise<void>;
-        actionOptions = app.options.uninstall;
-    }
-
-    if (actionFn && actionOptions) {
-        void actionFn(Object.values(installPaths), actionOptions).then(() => active = false);
+        void (uninstall(Object.values(installPaths), app.options.uninstall)).then(() => active = false);
     }
 </script>
 

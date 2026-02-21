@@ -59,9 +59,9 @@ func (i *BDInstall) Prepare() error {
 	return i.prepare()
 }
 
-// Repair disables plugins for a specific Discord channel
-func (i *BDInstall) Repair(channel types.DiscordChannel) error {
-	return i.repair(channel)
+// Repair repairs the BetterDiscord installation with specific options
+func (i *BDInstall) Repair(channel types.DiscordChannel, options types.RepairOptions) error {
+	return i.repair(channel, options)
 }
 
 func (i *BDInstall) IsAsarInstalled() bool {

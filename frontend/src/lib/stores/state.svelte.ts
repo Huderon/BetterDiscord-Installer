@@ -9,8 +9,15 @@ const app = $state<AppState>({
     channels: {stable: false, ptb: false, canary: false},
     options: {
         install: {restartDiscord: true},
-        repair: {disablePlugins: true},
-        uninstall: {fullUninstall: false}
+        repair: {
+            disablePlugins: false,
+            disableThemes: false,
+            clearCustomCSS: false,
+            clearWebpackCache: false,
+            clearAddonStoreCache: false,
+            resetSettings: false
+        },
+        uninstall: {fullUninstall: false, restartDiscord: true}
     },
     navigation: createNavState({
         direction: NavDirection.FORWARDS,

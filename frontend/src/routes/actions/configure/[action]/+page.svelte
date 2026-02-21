@@ -41,14 +41,38 @@
             Disabling this leaves Discord running, but the update won't apply until the next restart.
         </Text>
     {:else if app.action === "repair"}
-        <Checkbox bind:checked={app.options.repair.disablePlugins} label="Disable all plugins during repair" />
+        <Checkbox bind:checked={app.options.repair.disablePlugins} label="Disable all plugins" />
         <Text type="subtext" hasMargin>
-            This clears enabled plugins for the selected channels to ensure a clean recovery.
+            Removes enabled plugins for the selected channels.
+        </Text>
+        <Checkbox bind:checked={app.options.repair.disableThemes} label="Disable all themes" />
+        <Text type="subtext" hasMargin>
+            Removes enabled themes for the selected channels.
+        </Text>
+        <Checkbox bind:checked={app.options.repair.clearCustomCSS} label="Clear custom CSS" />
+        <Text type="subtext" hasMargin>
+            Resets the custom CSS file for the selected channels.
+        </Text>
+        <Checkbox bind:checked={app.options.repair.clearWebpackCache} label="Clear webpack cache" />
+        <Text type="subtext" hasMargin>
+            Removes cached webpack bundles and rebuilds on next launch.
+        </Text>
+        <Checkbox bind:checked={app.options.repair.clearAddonStoreCache} label="Clear addon store cache" />
+        <Text type="subtext" hasMargin>
+            Clears the addon store cache for a fresh sync.
+        </Text>
+        <Checkbox bind:checked={app.options.repair.resetSettings} label="Reset BetterDiscord settings" />
+        <Text type="subtext" hasMargin>
+            Removes settings so BetterDiscord starts fresh.
         </Text>
     {:else}
         <Checkbox bind:checked={app.options.uninstall.fullUninstall} label="Remove all BetterDiscord data" />
         <Text type="subtext" hasMargin>
             Removes the BetterDiscord folder, including plugins, themes, and settings.
+        </Text>
+        <Checkbox bind:checked={app.options.uninstall.restartDiscord} label="Restart Discord after uninstall" />
+        <Text type="subtext" hasMargin>
+            Applies the uninstall immediately by restarting Discord.
         </Text>
     {/if}
 </Page>

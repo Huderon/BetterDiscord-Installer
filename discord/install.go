@@ -71,11 +71,13 @@ func (discord *DiscordInstall) UninstallBD(options types.UninstallOptions) error
 		log.Println("")
 	}
 
-	log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
-	if err := discord.restart(); err != nil {
-		return err
+	if options.RestartDiscord {
+		log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
+		if err := discord.restart(); err != nil {
+			return err
+		}
+		log.Println("")
 	}
-	log.Println("")
 
 	return nil
 }
@@ -94,10 +96,8 @@ func (discord *DiscordInstall) RepairBD(options types.RepairOptions) error {
 		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
 	}
 
-	if options.DisablePlugins {
-		if err := bd.Repair(discord.Channel); err != nil {
-			return err
-		}
+	if err := bd.Repair(discord.Channel, options); err != nil {
+		return err
 	}
 
 	return nil

@@ -10,9 +10,15 @@ export namespace types {
 	}
 	export interface RepairOptions {
 	    disablePlugins: boolean;
+	    disableThemes: boolean;
+	    clearCustomCSS: boolean;
+	    clearWebpackCache: boolean;
+	    clearAddonStoreCache: boolean;
+	    resetSettings: boolean;
 	}
 	export interface UninstallOptions {
 	    fullUninstall: boolean;
+	    restartDiscord: boolean;
 	}
 
 }

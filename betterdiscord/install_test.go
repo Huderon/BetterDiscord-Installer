@@ -149,7 +149,7 @@ func TestBDInstall_Repair(t *testing.T) {
 	}
 
 	// Run repair
-	err = install.Repair(types.Stable)
+	err = install.Repair(types.Stable, types.RepairOptions{DisablePlugins: true})
 	if err != nil {
 		t.Fatalf("Repair() failed: %v", err)
 	}
@@ -168,7 +168,7 @@ func TestBDInstall_Repair_NoPluginsFile(t *testing.T) {
 	install := New(bdRoot)
 
 	// Don't create any files - repair should succeed without error
-	err := install.Repair(types.Stable)
+	err := install.Repair(types.Stable, types.RepairOptions{DisablePlugins: true})
 	if err != nil {
 		t.Fatalf("Repair() should succeed when plugins.json doesn't exist: %v", err)
 	}
@@ -195,7 +195,7 @@ func TestBDInstall_Repair_MultipleChannels(t *testing.T) {
 	}
 
 	// Repair only Stable channel
-	err := install.Repair(types.Stable)
+	err := install.Repair(types.Stable, types.RepairOptions{DisablePlugins: true})
 	if err != nil {
 		t.Fatalf("Repair(Stable) failed: %v", err)
 	}

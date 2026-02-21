@@ -39,21 +39,78 @@ func (i *BDInstall) prepare() error {
 	return nil
 }
 
-func (i *BDInstall) repair(channel types.DiscordChannel) error {
+func (i *BDInstall) repair(channel types.DiscordChannel, options types.RepairOptions) error {
 	channelFolder := filepath.Join(i.data, channel.String())
-	pluginsJson := filepath.Join(channelFolder, "plugins.json")
 
-	if !utils.Exists(pluginsJson) {
-		log.Printf("✅ No plugins enabled for %s\n", channel.Name())
+	if options.DisablePlugins {
+		if err := removeFile(channelFolder, "plugins.json", "plugins", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	if options.DisableThemes {
+		if err := removeFile(channelFolder, "themes.json", "themes", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	if options.ClearCustomCSS {
+		if err := removeFile(channelFolder, "custom.css", "custom CSS", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	if options.ClearWebpackCache {
+		if err := removeFile(channelFolder, "webpack.json", "webpack cache", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	if options.ClearAddonStoreCache {
+		if err := removeFile(channelFolder, "addon-store.json", "addon store cache", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	if options.ResetSettings {
+		if err := removeFile(channelFolder, "settings.json", "settings", channel.Name()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func removeFile(basePath string, filename string, label string, channelName string) error {
+	path := filepath.Join(basePath, filename)
+	if !utils.Exists(path) {
+		log.Printf("✅ No %s found for %s\n", label, channelName)
 		return nil
 	}
 
-	if err := os.Remove(pluginsJson); err != nil {
-		log.Printf("❌ Unable to remove file %s\n", pluginsJson)
+	if err := os.Remove(path); err != nil {
+		log.Printf("❌ Unable to remove %s: %s\n", label, path)
 		log.Printf("   %s\n", err.Error())
 		return err
 	}
 
-	log.Printf("✅ Plugins disabled for %s\n", channel.Name())
+	log.Printf("✅ Removed %s for %s\n", label, channelName)
+	return nil
+}
+
+func removeDir(basePath string, dirname string, label string, channelName string) error {
+	path := filepath.Join(basePath, dirname)
+	if !utils.Exists(path) {
+		log.Printf("✅ No %s found for %s\n", label, channelName)
+		return nil
+	}
+
+	if err := os.RemoveAll(path); err != nil {
+		log.Printf("❌ Unable to remove %s: %s\n", label, path)
+		log.Printf("   %s\n", err.Error())
+		return err
+	}
+
+	log.Printf("✅ Removed %s for %s\n", label, channelName)
 	return nil
 }
