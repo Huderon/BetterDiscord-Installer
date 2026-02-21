@@ -17,64 +17,65 @@
         uninstall: "Decide how much data should be removed."
     };
 
-    const installOptions = [
+    const installOptions: Array<{label: string; description: string; bind: keyof typeof app.options.install}> = [
         {
             label: "Restart Discord after install",
-            description: "Disabling this leaves Discord running, but the update won't apply until the next restart.",
-            bind: "restartDiscord" as keyof typeof app.options.install
+            description: "Disabling this means BetterDiscord won't apply until the next restart.",
+            bind: "restartDiscord"
         }
     ];
 
-    const repairOptions = [
+    const repairOptions: Array<{label: string; description: string; bind: keyof typeof app.options.repair}> = [
         {
             label: "Disable all plugins",
-            description: "Removes enabled plugins for the selected channels.",
-            bind: "disablePlugins" as keyof typeof app.options.repair
+            description: "Minimizes the chance of plugins crashing your client.",
+            bind: "disablePlugins"
         },
         {
             label: "Disable all themes",
-            description: "Removes enabled themes for the selected channels.",
-            bind: "disableThemes" as keyof typeof app.options.repair
+            description: "Reduces the possibility of themes obscuring UI elements.",
+
+            bind: "disableThemes"
+        },
+        {
+            label: "Reset BetterDiscord settings",
+            description: "Discards settings so BetterDiscord starts fresh.",
+            bind: "resetSettings"
         },
         {
             label: "Clear custom CSS",
             description: "Resets the custom CSS file for the selected channels.",
-            bind: "clearCustomCSS" as keyof typeof app.options.repair
-        },
-        {
-            label: "Clear webpack cache",
-            description: "Removes cached webpack bundles and rebuilds on next launch.",
-            bind: "clearWebpackCache" as keyof typeof app.options.repair
+            bind: "clearCustomCSS"
         },
         {
             label: "Clear addon store cache",
             description: "Clears the addon store cache for a fresh sync.",
-            bind: "clearAddonStoreCache" as keyof typeof app.options.repair
+            bind: "clearAddonStoreCache"
         },
         {
-            label: "Reset BetterDiscord settings",
-            description: "Removes settings so BetterDiscord starts fresh.",
-            bind: "resetSettings" as keyof typeof app.options.repair
-        }
+            label: "Clear webpack cache",
+            description: "Wipes all cached webpack module IDs (next restart will be slow).",
+            bind: "clearWebpackCache"
+        },
     ];
 
-    const uninstallOptions = [
+    const uninstallOptions: Array<{label: string; description: string; bind: keyof typeof app.options.uninstall}> = [
         {
             label: "Remove all BetterDiscord data",
-            description: "Removes the BetterDiscord folder, including plugins, themes, and settings.",
-            bind: "fullUninstall" as keyof typeof app.options.uninstall
+            description: "Removes the BetterDiscord folder, including plugins, themes, & settings.",
+            bind: "fullUninstall"
         },
         {
             label: "Restart Discord after uninstall",
             description: "Applies the uninstall immediately by restarting Discord.",
-            bind: "restartDiscord" as keyof typeof app.options.uninstall
+            bind: "restartDiscord"
         }
     ];
 </script>
 
 <Page title={titleByAction[app.action]} previous="/actions/setup/{app.action}" next="/actions/perform/{app.action}">
     {#snippet icon()}
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             {#if app.action === "install"}
                 <path d="M18.2498 20.4999C18.664 20.4998 19 20.8355 19 21.2497C19 21.6639 18.6644 21.9998 18.2502 21.9999L5.25022 22.0037C4.836 22.0038 4.5 21.6681 4.5 21.2539C4.5 20.8397 4.83557 20.5038 5.24978 20.5037L18.2498 20.4999ZM11.6482 2.01173L11.75 2.00488C12.1297 2.00488 12.4435 2.28704 12.4932 2.65311L12.5 2.75488L12.499 16.4399L16.2208 12.7196C16.4871 12.4533 16.9038 12.4291 17.1974 12.647L17.2815 12.7197C17.5477 12.986 17.5719 13.4026 17.354 13.6962L17.2814 13.7803L12.2837 18.7769C12.0176 19.043 11.6012 19.0673 11.3076 18.8498L11.2235 18.7772L6.22003 13.7806C5.92694 13.4879 5.92661 13.0131 6.21931 12.72C6.48539 12.4535 6.90204 12.429 7.1958 12.6467L7.27997 12.7192L10.999 16.4329L11 2.75488C11 2.37519 11.2822 2.06139 11.6482 2.01173L11.75 2.00488L11.6482 2.01173Z" />
             {:else if app.action === "repair"}
@@ -127,5 +128,6 @@
         display: flex;
         flex-direction: column;
         overflow-y: auto;
+        padding-bottom: 20px;
     }
 </style>

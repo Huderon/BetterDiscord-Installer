@@ -75,10 +75,10 @@
 <footer class="install-footer">
     <SocialLinks />
     <ButtonGroup>
-        <Button style="secondary" disabled={previousDisabled} onclick={goBack} onkeypress={tryGoNext}>
+        <Button style="secondary" disabled={previousDisabled} onclick={goBack} onkeypress={tryGoPrevious}>
             {previousLabel}
         </Button>
-        <Button style="primary" disabled={nextDisabled} onclick={goToNext} onkeypress={tryGoPrevious}>
+        <Button style="primary" disabled={nextDisabled} onclick={goToNext} onkeypress={tryGoNext}>
             {nextLabel}
         </Button>
     </ButtonGroup>

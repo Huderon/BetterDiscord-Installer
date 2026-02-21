@@ -36,9 +36,11 @@
             {#if onclick}
                 <Button style="secondary" {onclick}>Browse</Button>
             {:else}
-                <svg class="checkbox-glyph" class:checked viewBox="0 0 24 24">
-                    <path d="M0.73, 11.91 8.1,19.28 22.79,4.59" fill="none" />
-                </svg>
+                <div class="checkmark-wrap" class:checked>
+                    <svg class="checkmark" viewBox="0 0 24 24">
+                        <path d="M0.73, 11.91 8.1,19.28 22.79,4.59" fill="none" />
+                    </svg>
+                </div>
             {/if}
         </div>
     </div>
@@ -146,13 +148,13 @@
         opacity: 0.8;
     }
 
-    .checkbox-glyph {
-        width: 28px;
-        height: 28px;
+    .checkmark {
+        width: 24px;
+        height: 24px;
         color: #fff;
     }
 
-    .checkbox-glyph path {
+    .checkmark path {
         transform: scale(0.8);
         transform-origin: center;
         stroke: currentColor;
@@ -161,12 +163,30 @@
         stroke-dashoffset: 32;
     }
 
-    .checkbox-glyph.checked path {
+    .checked .checkmark path {
         transition: 250ms cubic-bezier(0.55, 0, 0, 1) stroke-dashoffset;
         stroke-dashoffset: 0;
     }
 
     .controls {
         margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+
+    .checkmark-wrap {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        /* background-color: rgba(255, 255, 255, 0.2); */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* transition: 250ms cubic-bezier(0.55, 0, 0, 1) background-color; */
+    }
+
+    /* .checkmark-wrap.checked {
+        background-color: rgba(0,0,0, 0.8);
+    } */
 </style>
