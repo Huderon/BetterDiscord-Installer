@@ -2,6 +2,7 @@
     import Button from "./Button.svelte";
     import {handleKeyboardToggle} from "$lib/utils/handlers";
     import type {Snippet} from "svelte";
+    import {tooltip} from "./tooltip";
 
     interface Props {
         description: string;
@@ -11,16 +12,18 @@
         onchange?: (event: Event) => void;
         icon?: Snippet;
         children?: Snippet;
+        showTooltip?: boolean;
+        showDescription?: boolean;
     }
 
     // eslint-disable-next-line prefer-const
-    let {children, icon, description, disabled = false, checked = $bindable(), onclick, onchange}: Props = $props();
+    let {children, icon, description, disabled = false, checked = $bindable(), onclick, onchange, showTooltip = false, showDescription = true}: Props = $props();
 
     let checkbox: HTMLInputElement;
 
 </script>
 
-<label class="check-container">
+<label class="check-container" use:tooltip={{text: showTooltip ? description : ""}}>
     <input bind:this={checkbox} bind:checked type="checkbox" hidden {disabled} {onchange} />
     <div onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} tabindex="0" class="check-item" class:disabled role="listbox">
         <div class="icon">
@@ -30,7 +33,9 @@
             <h5>
                 {@render children?.()}
             </h5>
-            <span title={description}>{description}</span>
+            {#if showDescription}
+                <span title={description}>{description}</span>
+            {/if}
         </div>
         <div class="controls" role="presentation" onkeypress={e => e.stopPropagation()}>
             {#if onclick}
@@ -183,10 +188,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        /* transition: 250ms cubic-bezier(0.55, 0, 0, 1) background-color; */
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: 250ms cubic-bezier(0.55, 0, 0, 1) border-color;
     }
 
-    /* .checkmark-wrap.checked {
-        background-color: rgba(0,0,0, 0.8);
-    } */
+    .checkmark-wrap.checked {
+        border-color: transparent;
+    }
 </style>

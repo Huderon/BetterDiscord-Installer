@@ -20,6 +20,7 @@ export function tooltip(node: HTMLElement, {
     x = 0,
     y = 0
 }: TooltipProps) {
+    if (!text) return;
 
     let isComponentRendered = false;
     let component: ReturnType<typeof Tooltip>;

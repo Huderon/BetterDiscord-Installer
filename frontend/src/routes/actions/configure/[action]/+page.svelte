@@ -39,12 +39,12 @@
         },
         {
             label: "Reset BetterDiscord settings",
-            description: "Discards settings so BetterDiscord starts fresh.",
+            description: "Discards all settings so BetterDiscord starts fresh.",
             bind: "resetSettings"
         },
         {
-            label: "Clear custom CSS",
-            description: "Resets the custom CSS file for the selected channels.",
+            label: "Reset custom css",
+            description: "Empties the custom css file for the selected channels.",
             bind: "clearCustomCSS"
         },
         {
@@ -71,6 +71,21 @@
             bind: "restartDiscord"
         }
     ];
+
+    const options = $derived.by(() => {
+        if (app.action === "install") return installOptions;
+        if (app.action === "repair") return repairOptions;
+        return uninstallOptions;
+    });
+
+    let fadeHeight = $derived(options.length > 3 ? 48 : 0);
+    function handleScroll(event: Event) {
+        const target = event.target as HTMLElement;
+        const scrollTop = target.scrollTop;
+        const scrollBottom = target.scrollHeight - target.clientHeight;
+        const percentFromBottom = (scrollBottom - scrollTop) / scrollBottom;
+        fadeHeight = 48 * percentFromBottom;
+    }
 </script>
 
 <Page title={titleByAction[app.action]} previous="/actions/setup/{app.action}" next="/actions/perform/{app.action}">
@@ -86,48 +101,70 @@
         </svg>
     {/snippet}
 
-    <Text type="paragraph" hasMargin>
-        {subtitleByAction[app.action]}
-    </Text>
+    <div class="subtitle">
+        <Text type="paragraph" hasMargin>
+            {subtitleByAction[app.action]}
+        </Text>
+    </div>
 
-    <div class="scroll-container">
-    {#if app.action === "install"}
-        {#each installOptions as option (option.bind)}
+    <div class="display-container" onscroll={handleScroll}>
+        {#each options as option (option.bind)}
             <Multiselect
-                bind:checked={app.options.install[option.bind]}
+                // @ts-ignore-error because I can't be bothered
+                bind:checked={app.options[app.action][option.bind]}
                 description={option.description}
+                // showTooltip={false}
+                // showDescription={false}
             >
                 {option.label}
             </Multiselect>
         {/each}
-    {:else if app.action === "repair"}
-        {#each repairOptions as option (option.bind)}
-            <Multiselect
-                bind:checked={app.options.repair[option.bind]}
-                description={option.description}
-            >
-                {option.label}
-            </Multiselect>
-        {/each}
-    {:else}
-        {#each uninstallOptions as option (option.bind)}
-            <Multiselect
-                bind:checked={app.options.uninstall[option.bind]}
-                description={option.description}
-            >
-                {option.label}
-            </Multiselect>
-        {/each}
-    {/if}
+        <div class="fade" style:height="{fadeHeight}px"></div>
     </div>
 </Page>
 
 
 <style>
-    .scroll-container {
+    .subtitle {
+        margin-bottom: 0px;
+    }
+
+    .display-container {
         display: flex;
         flex-direction: column;
         overflow-y: auto;
-        padding-bottom: 20px;
+        padding-right: 8px;
+        padding-bottom: 10px;
+    }
+
+    /* .display-container.grid { */
+        /* display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, auto);
+        gap: 5px;
+        align-content: center;
+        height: 100%; */
+    /* } */
+
+    /* .display-container.grid > :global(.check-container) { */
+        /* margin-bottom: 0; */
+    /* } */
+
+    .display-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+     .fade {
+        content: "";
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(transparent, var(--bg2));
+        pointer-events: none;
+        z-index: 1;
+        transition: 200ms ease height;
     }
 </style>
