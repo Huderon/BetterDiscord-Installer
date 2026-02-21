@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "bun run --bun vite dev",
     "build": "bun run --bun vite build",
+    "postbuild": "touch build/.gitkeep",
     "preview": "bun run --bun vite preview",
     "check": "bun run --bun svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "bun run --bun svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

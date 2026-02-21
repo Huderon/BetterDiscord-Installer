@@ -8,15 +8,15 @@ import (
 )
 
 type DiscordInstall struct {
-	CorePath  string                `json:"corePath"`
-	Channel   types.DiscordChannel  `json:"channel"`
-	Version   string                `json:"version"`
-	IsFlatpak bool                  `json:"isFlatpak"`
-	IsSnap    bool                  `json:"isSnap"`
+	CorePath  string               `json:"corePath"`
+	Channel   types.DiscordChannel `json:"channel"`
+	Version   string               `json:"version"`
+	IsFlatpak bool                 `json:"isFlatpak"`
+	IsSnap    bool                 `json:"isSnap"`
 }
 
 // InstallBD installs BetterDiscord into this Discord installation
-func (discord *DiscordInstall) InstallBD() error {
+func (discord *DiscordInstall) InstallBD(options types.InstallOptions) error {
 	bd := discord.GetBetterDiscordInstall()
 
 	// Make BetterDiscord folders
@@ -43,23 +43,33 @@ func (discord *DiscordInstall) InstallBD() error {
 	log.Println("✅ Injection successful")
 	log.Println("")
 
-	// Terminate and restart Discord if possible
-	log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
-	if err := discord.restart(); err != nil {
-		return err
+	if options.RestartDiscord {
+		// Terminate and restart Discord if possible
+		log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
+		if err := discord.restart(); err != nil {
+			return err
+		}
+		log.Println("")
 	}
-	log.Println("")
 
 	return nil
 }
 
 // UninstallBD removes BetterDiscord from this Discord installation
-func (discord *DiscordInstall) UninstallBD() error {
+func (discord *DiscordInstall) UninstallBD(options types.UninstallOptions) error {
 	log.Println("🧹 Removing injection...")
 	if err := discord.uninject(); err != nil {
 		return err
 	}
 	log.Println("")
+
+	if options.FullUninstall {
+		install := discord.GetBetterDiscordInstall()
+		if err := install.RemoveAll(); err != nil {
+			return err
+		}
+		log.Println("")
+	}
 
 	log.Printf("🔄 Restarting %s...\n", discord.Channel.Name())
 	if err := discord.restart(); err != nil {
@@ -71,8 +81,8 @@ func (discord *DiscordInstall) UninstallBD() error {
 }
 
 // RepairBD repairs BetterDiscord for this Discord installation
-func (discord *DiscordInstall) RepairBD() error {
-	if err := discord.UninstallBD(); err != nil {
+func (discord *DiscordInstall) RepairBD(options types.RepairOptions) error {
+	if err := discord.UninstallBD(types.UninstallOptions{FullUninstall: false}); err != nil {
 		return err
 	}
 
@@ -84,8 +94,10 @@ func (discord *DiscordInstall) RepairBD() error {
 		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
 	}
 
-	if err := bd.Repair(discord.Channel); err != nil {
-		return err
+	if options.DisablePlugins {
+		if err := bd.Repair(discord.Channel); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -12,6 +12,7 @@ const config = {
             "@wails/*": "./src/lib/wailsjs/runtime/*",
             "@api": "./src/lib/wailsjs/go/api/Controller",
             "@app": "./src/lib/wailsjs/go/main/App",
+            "@models": "./src/lib/wailsjs/go/models.ts"
         }
     }
 };

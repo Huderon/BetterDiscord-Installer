@@ -1,3 +1,4 @@
+import type {types} from "@models";
 export type DiscordChannel = "stable" | "ptb" | "canary";
 export type InstallerAction = "install" | "repair" | "uninstall";
 export type OSName = "windows" | "darwin" | "linux";
@@ -20,6 +21,15 @@ export interface NavigationState {
     previousAction?: () => void;
 }
 
+export interface ActionOptionsMap {
+    install: types.InstallOptions;
+    repair: types.RepairOptions;
+    uninstall: types.UninstallOptions;
+}
+
+export type Action = keyof ActionOptionsMap;
+export type ActionOptions = ActionOptionsMap[Action];
+
 export const createNavState = (state?: Partial<NavigationState>) => {
     return {
         next: undefined,
@@ -39,5 +49,6 @@ export interface AppState {
     action: InstallerAction;
     corePaths: Record<DiscordChannel, string>;
     channels: Record<DiscordChannel, boolean>;
+    options: ActionOptionsMap;
     navigation: NavigationState;
 }

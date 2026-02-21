@@ -7,6 +7,11 @@ const app = $state<AppState>({
     action: "install",
     corePaths: {stable: "", ptb: "", canary: ""},
     channels: {stable: false, ptb: false, canary: false},
+    options: {
+        install: {restartDiscord: true},
+        repair: {disablePlugins: true},
+        uninstall: {fullUninstall: false}
+    },
     navigation: createNavState({
         direction: NavDirection.FORWARDS,
     })

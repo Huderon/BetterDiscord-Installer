@@ -14,12 +14,12 @@ export function GetDiscordPath(arg1) {
   return window['go']['api']['Controller']['GetDiscordPath'](arg1);
 }
 
-export function Install(arg1) {
-  return window['go']['api']['Controller']['Install'](arg1);
+export function Install(arg1, arg2) {
+  return window['go']['api']['Controller']['Install'](arg1, arg2);
 }
 
-export function Repair(arg1) {
-  return window['go']['api']['Controller']['Repair'](arg1);
+export function Repair(arg1, arg2) {
+  return window['go']['api']['Controller']['Repair'](arg1, arg2);
 }
 
 export function SetContext(arg1) {
@@ -30,8 +30,8 @@ export function ShowNotice(arg1, arg2, arg3) {
   return window['go']['api']['Controller']['ShowNotice'](arg1, arg2, arg3);
 }
 
-export function Uninstall(arg1) {
-  return window['go']['api']['Controller']['Uninstall'](arg1);
+export function Uninstall(arg1, arg2) {
+  return window['go']['api']['Controller']['Uninstall'](arg1, arg2);
 }
 
 export function Write(arg1) {

@@ -4,9 +4,10 @@
     import app from "$lib/stores/state.svelte";
     import {onDestroy, onMount} from "svelte";
     import {EventsOn as listenFor, EventsOff as unlistenFor} from "@wails/runtime";
+    import {goto} from "$app/navigation";
     import {Install as install, Repair as repair, Uninstall as uninstall} from "@api";
     import Page from "$lib/components/Page.svelte";
-    import type {DiscordChannel} from "$lib/types";
+    import type {ActionOptions, DiscordChannel} from "$lib/types";
     import quit from "$lib/utils/quit";
 
 
@@ -36,11 +37,21 @@
         status = "";
     }
 
+    function handleNavigate(payload: {action?: "install" | "repair" | "uninstall"}) {
+        if (!payload?.action) return;
+        app.action = payload.action;
+        // TODO: This is hacky, we can do better.
+        // also TODO: comprehensive usage of resolve
+        // eslint-disable-next-line svelte/no-navigation-without-resolve, svelte/no-goto-without-base
+        void goto(`/actions/configure/${payload.action}`);
+    }
+
     onMount(() => {
         listenFor("log", (message: string) => log(message.trim()));
         listenFor("success", () => succeed());
         listenFor("failure", () => fail());
         listenFor("reset", reset);
+        listenFor("navigate", handleNavigate);
     });
 
     onDestroy(() => {
@@ -48,6 +59,7 @@
         unlistenFor("success");
         unlistenFor("failure");
         unlistenFor("reset");
+        unlistenFor("navigate");
     });
 
     const currentAction = app.action;
@@ -59,21 +71,42 @@
         installPaths[channel] = app.corePaths[channel];
     }
 
+    // const appOptions = $derived((app as unknown as {
+    //     options: {
+    //         install: {restartDiscord: boolean};
+    //         repair: {disablePlugins: boolean};
+    //         uninstall: {fullUninstall: boolean};
+    //     };
+    // }).options);
+
     let active = $state(true);
     log(`Starting ${currentAction}...`);
     log("");
 
+    // TODO: this is really gross, we should be able to do better than this.
     // Run action scripts
-    let actionFn: ((paths: string[]) => Promise<void>) | undefined;
-    if (currentAction === "install") actionFn = install;
-    if (currentAction === "repair") actionFn = repair;
-    if (currentAction === "uninstall") actionFn = uninstall;
+    let actionFn: ((paths: string[], options: ActionOptions) => Promise<void>) | undefined;
+    let actionOptions: ActionOptions | undefined;
+    if (currentAction === "install") {
+        actionFn = install as (paths: string[], options: ActionOptions) => Promise<void>;
+        actionOptions = app.options.install;
+    }
+    if (currentAction === "repair") {
+        actionFn = repair as (paths: string[], options: ActionOptions) => Promise<void>;
+        actionOptions = app.options.repair;
+    }
+    if (currentAction === "uninstall") {
+        actionFn = uninstall as (paths: string[], options: ActionOptions) => Promise<void>;
+        actionOptions = app.options.uninstall;
+    }
 
-    void actionFn?.(Object.values(installPaths)).then(() => active = false);
+    if (actionFn && actionOptions) {
+        void actionFn(Object.values(installPaths), actionOptions).then(() => active = false);
+    }
 </script>
 
 
-<Page title="{currentAction[0].toUpperCase()}{currentAction.slice(1)}" previous="/actions/setup/{app.action}" nextAction={quit} nextLabel="Quit" canGoNext={!active} canGoPrevious={!active}>
+<Page title="{currentAction[0].toUpperCase()}{currentAction.slice(1)}" previous="/actions/configure/{app.action}" nextAction={quit} nextLabel="Quit" canGoNext={!active} canGoPrevious={!active}>
     {#snippet icon()}
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
             {#if currentAction === "install"}

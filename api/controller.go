@@ -36,14 +36,14 @@ func (d *Controller) GetDiscordPath(channel string) string {
 }
 
 // #region Actions
-func (action *Controller) Install(corePaths []string) {
+func (action *Controller) Install(corePaths []string, options types.InstallOptions) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
 			continue
 		}
 
-		if err := install.InstallBD(); err != nil {
+		if err := install.InstallBD(options); err != nil {
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}
@@ -52,14 +52,14 @@ func (action *Controller) Install(corePaths []string) {
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Controller) Uninstall(corePaths []string) {
+func (action *Controller) Uninstall(corePaths []string, options types.UninstallOptions) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
 			continue
 		}
 
-		if err := install.UninstallBD(); err != nil {
+		if err := install.UninstallBD(options); err != nil {
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}
@@ -68,36 +68,40 @@ func (action *Controller) Uninstall(corePaths []string) {
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Controller) Repair(corePaths []string) {
+func (action *Controller) Repair(corePaths []string, options types.RepairOptions) {
 	for i := range corePaths {
 		install := discord.ResolvePath(corePaths[i])
 		if install == nil {
 			continue
 		}
 
-		if err := install.RepairBD(); err != nil {
+		if err := install.RepairBD(options); err != nil {
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}
 	}
-
-	runtime.EventsEmit(action.ctx, "success")
 
 	result, err := runtime.MessageDialog(action.ctx, runtime.MessageDialogOptions{
 		Type:          runtime.QuestionDialog,
-		Title:         "Reinstall BetterDiscord?",
-		Message:       "After repairing, you need to reinstall BetterDiscord. Would you like to do that now?",
-		DefaultButton: "No",
+		Title:         "Repair Complete",
+		Message:       "Repair is complete. Would you like to reinstall BetterDiscord now?",
+		DefaultButton: "Yes",
 	})
 
 	if err != nil {
+		runtime.EventsEmit(action.ctx, "success")
 		return
 	}
 
 	if result == "Yes" {
 		runtime.EventsEmit(action.ctx, "reset")
-		action.Install(corePaths)
+		runtime.EventsEmit(action.ctx, "navigate", map[string]string{
+			"action": "install",
+		})
+		return
 	}
+
+	runtime.EventsEmit(action.ctx, "success")
 }
 
 // #endregion
