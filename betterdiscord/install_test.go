@@ -214,6 +214,116 @@ func TestBDInstall_Repair_MultipleChannels(t *testing.T) {
 	}
 }
 
+func TestBDInstall_RepairWithOptions_AllToggles(t *testing.T) {
+	tmpDir := t.TempDir()
+	bdRoot := filepath.Join(tmpDir, "BetterDiscord")
+
+	install := New(bdRoot)
+	channel := types.Stable
+	channelFolder := filepath.Join(install.Data(), channel.String())
+	if err := os.MkdirAll(channelFolder, 0755); err != nil {
+		t.Fatalf("Failed to create channel folder: %v", err)
+	}
+
+	paths := []string{
+		filepath.Join(channelFolder, "plugins.json"),
+		filepath.Join(channelFolder, "themes.json"),
+		filepath.Join(channelFolder, "custom.css"),
+		filepath.Join(channelFolder, "settings.json"),
+		filepath.Join(channelFolder, "webpack.json"),
+		filepath.Join(channelFolder, "addon-store.json"),
+	}
+	for _, path := range paths {
+		if err := os.WriteFile(path, []byte("{}"), 0644); err != nil {
+			t.Fatalf("Failed to create file %s: %v", path, err)
+		}
+	}
+
+	options := types.RepairOptions{
+		DisablePlugins:       true,
+		DisableThemes:        true,
+		ClearCustomCSS:       true,
+		ClearWebpackCache:    true,
+		ClearAddonStoreCache: true,
+		ResetSettings:        true,
+	}
+
+	if err := install.Repair(channel, options); err != nil {
+		t.Fatalf("RepairWithOptions() failed: %v", err)
+	}
+
+	for _, path := range paths {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Errorf("Expected %s to be removed", path)
+		}
+	}
+
+	backupRoot := filepath.Join(channelFolder, "backup")
+	entries, err := os.ReadDir(backupRoot)
+	if err != nil {
+		t.Fatalf("Expected backup folder to exist: %v", err)
+	}
+	if len(entries) == 0 {
+		t.Fatalf("Expected at least one backup folder")
+	}
+	backupDir := filepath.Join(backupRoot, entries[0].Name())
+	if _, err := os.Stat(filepath.Join(backupDir, "custom.css")); err != nil {
+		t.Fatalf("Expected custom.css to be backed up: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "settings.json")); err != nil {
+		t.Fatalf("Expected settings.json to be backed up: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "plugins.json")); err != nil {
+		t.Fatalf("Expected plugins.json to be backed up: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "themes.json")); err != nil {
+		t.Fatalf("Expected themes.json to be backed up: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "webpack.json")); err != nil {
+		t.Fatalf("Expected webpack.json to be backed up: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "addon-store.json")); err != nil {
+		t.Fatalf("Expected addon-store.json to be backed up: %v", err)
+	}
+}
+
+func TestBDInstall_RepairWithOptions_PartialToggles(t *testing.T) {
+	tmpDir := t.TempDir()
+	bdRoot := filepath.Join(tmpDir, "BetterDiscord")
+
+	install := New(bdRoot)
+	channel := types.Stable
+	channelFolder := filepath.Join(install.Data(), channel.String())
+	if err := os.MkdirAll(channelFolder, 0755); err != nil {
+		t.Fatalf("Failed to create channel folder: %v", err)
+	}
+
+	pluginsJson := filepath.Join(channelFolder, "plugins.json")
+	themesJson := filepath.Join(channelFolder, "themes.json")
+	if err := os.WriteFile(pluginsJson, []byte("{}"), 0644); err != nil {
+		t.Fatalf("Failed to create plugins.json: %v", err)
+	}
+	if err := os.WriteFile(themesJson, []byte("{}"), 0644); err != nil {
+		t.Fatalf("Failed to create themes.json: %v", err)
+	}
+
+	options := types.RepairOptions{
+		DisablePlugins: true,
+		DisableThemes:  false,
+	}
+
+	if err := install.Repair(channel, options); err != nil {
+		t.Fatalf("RepairWithOptions() failed: %v", err)
+	}
+
+	if _, err := os.Stat(pluginsJson); !os.IsNotExist(err) {
+		t.Errorf("Expected plugins.json to be removed")
+	}
+	if _, err := os.Stat(themesJson); os.IsNotExist(err) {
+		t.Errorf("Expected themes.json to remain")
+	}
+}
+
 func TestGetInstallation_WithBase(t *testing.T) {
 	basePath := "/test/config"
 	install := GetInstallation(basePath)
