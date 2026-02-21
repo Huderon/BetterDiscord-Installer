@@ -1,9 +1,9 @@
 <script lang="ts">
     import app from "$lib/stores/state.svelte";
     import Page from "$lib/components/Page.svelte";
-    import Checkbox from "$lib/components/Checkbox.svelte";
     import Text from "$lib/components/Text.svelte";
     import type {InstallerAction} from "$lib/types";
+    import Multiselect from "$lib/components/Multiselect.svelte";
 
     const titleByAction: Record<InstallerAction, string> = {
         install: "Configure Install",
@@ -16,6 +16,60 @@
         repair: "Customize how the repair process treats your setup.",
         uninstall: "Decide how much data should be removed."
     };
+
+    const installOptions = [
+        {
+            label: "Restart Discord after install",
+            description: "Disabling this leaves Discord running, but the update won't apply until the next restart.",
+            bind: "restartDiscord" as keyof typeof app.options.install
+        }
+    ];
+
+    const repairOptions = [
+        {
+            label: "Disable all plugins",
+            description: "Removes enabled plugins for the selected channels.",
+            bind: "disablePlugins" as keyof typeof app.options.repair
+        },
+        {
+            label: "Disable all themes",
+            description: "Removes enabled themes for the selected channels.",
+            bind: "disableThemes" as keyof typeof app.options.repair
+        },
+        {
+            label: "Clear custom CSS",
+            description: "Resets the custom CSS file for the selected channels.",
+            bind: "clearCustomCSS" as keyof typeof app.options.repair
+        },
+        {
+            label: "Clear webpack cache",
+            description: "Removes cached webpack bundles and rebuilds on next launch.",
+            bind: "clearWebpackCache" as keyof typeof app.options.repair
+        },
+        {
+            label: "Clear addon store cache",
+            description: "Clears the addon store cache for a fresh sync.",
+            bind: "clearAddonStoreCache" as keyof typeof app.options.repair
+        },
+        {
+            label: "Reset BetterDiscord settings",
+            description: "Removes settings so BetterDiscord starts fresh.",
+            bind: "resetSettings" as keyof typeof app.options.repair
+        }
+    ];
+
+    const uninstallOptions = [
+        {
+            label: "Remove all BetterDiscord data",
+            description: "Removes the BetterDiscord folder, including plugins, themes, and settings.",
+            bind: "fullUninstall" as keyof typeof app.options.uninstall
+        },
+        {
+            label: "Restart Discord after uninstall",
+            description: "Applies the uninstall immediately by restarting Discord.",
+            bind: "restartDiscord" as keyof typeof app.options.uninstall
+        }
+    ];
 </script>
 
 <Page title={titleByAction[app.action]} previous="/actions/setup/{app.action}" next="/actions/perform/{app.action}">
@@ -35,44 +89,43 @@
         {subtitleByAction[app.action]}
     </Text>
 
+    <div class="scroll-container">
     {#if app.action === "install"}
-        <Checkbox bind:checked={app.options.install.restartDiscord} label="Restart Discord after install" />
-        <Text type="subtext" hasMargin>
-            Disabling this leaves Discord running, but the update won't apply until the next restart.
-        </Text>
+        {#each installOptions as option (option.bind)}
+            <Multiselect
+                bind:checked={app.options.install[option.bind]}
+                description={option.description}
+            >
+                {option.label}
+            </Multiselect>
+        {/each}
     {:else if app.action === "repair"}
-        <Checkbox bind:checked={app.options.repair.disablePlugins} label="Disable all plugins" />
-        <Text type="subtext" hasMargin>
-            Removes enabled plugins for the selected channels.
-        </Text>
-        <Checkbox bind:checked={app.options.repair.disableThemes} label="Disable all themes" />
-        <Text type="subtext" hasMargin>
-            Removes enabled themes for the selected channels.
-        </Text>
-        <Checkbox bind:checked={app.options.repair.clearCustomCSS} label="Clear custom CSS" />
-        <Text type="subtext" hasMargin>
-            Resets the custom CSS file for the selected channels.
-        </Text>
-        <Checkbox bind:checked={app.options.repair.clearWebpackCache} label="Clear webpack cache" />
-        <Text type="subtext" hasMargin>
-            Removes cached webpack bundles and rebuilds on next launch.
-        </Text>
-        <Checkbox bind:checked={app.options.repair.clearAddonStoreCache} label="Clear addon store cache" />
-        <Text type="subtext" hasMargin>
-            Clears the addon store cache for a fresh sync.
-        </Text>
-        <Checkbox bind:checked={app.options.repair.resetSettings} label="Reset BetterDiscord settings" />
-        <Text type="subtext" hasMargin>
-            Removes settings so BetterDiscord starts fresh.
-        </Text>
+        {#each repairOptions as option (option.bind)}
+            <Multiselect
+                bind:checked={app.options.repair[option.bind]}
+                description={option.description}
+            >
+                {option.label}
+            </Multiselect>
+        {/each}
     {:else}
-        <Checkbox bind:checked={app.options.uninstall.fullUninstall} label="Remove all BetterDiscord data" />
-        <Text type="subtext" hasMargin>
-            Removes the BetterDiscord folder, including plugins, themes, and settings.
-        </Text>
-        <Checkbox bind:checked={app.options.uninstall.restartDiscord} label="Restart Discord after uninstall" />
-        <Text type="subtext" hasMargin>
-            Applies the uninstall immediately by restarting Discord.
-        </Text>
+        {#each uninstallOptions as option (option.bind)}
+            <Multiselect
+                bind:checked={app.options.uninstall[option.bind]}
+                description={option.description}
+            >
+                {option.label}
+            </Multiselect>
+        {/each}
     {/if}
+    </div>
 </Page>
+
+
+<style>
+    .scroll-container {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+</style>

@@ -3,13 +3,6 @@
     import {handleKeyboardToggle} from "$lib/utils/handlers";
     import type {Snippet} from "svelte";
 
-    // export let value: string;
-    // export let description;
-    // export let disabled = false;
-    // export let checked = false;
-    // export let onclick;
-    // export let onchange;
-
     interface Props {
         description: string;
         disabled?: boolean
@@ -40,7 +33,13 @@
             <span title={description}>{description}</span>
         </div>
         <div class="controls" role="presentation" onkeypress={e => e.stopPropagation()}>
-            <Button style="secondary" {onclick}>Browse</Button>
+            {#if onclick}
+                <Button style="secondary" {onclick}>Browse</Button>
+            {:else}
+                <svg class="checkbox-glyph" class:checked viewBox="0 0 24 24">
+                    <path d="M0.73, 11.91 8.1,19.28 22.79,4.59" fill="none" />
+                </svg>
+            {/if}
         </div>
     </div>
 </label>
@@ -145,5 +144,29 @@
 
     :global(.check-container input:checked + .check-item .button:active) {
         opacity: 0.8;
+    }
+
+    .checkbox-glyph {
+        width: 28px;
+        height: 28px;
+        color: #fff;
+    }
+
+    .checkbox-glyph path {
+        transform: scale(0.8);
+        transform-origin: center;
+        stroke: currentColor;
+        stroke-width: 2.45;
+        stroke-dasharray: 32;
+        stroke-dashoffset: 32;
+    }
+
+    .checkbox-glyph.checked path {
+        transition: 250ms cubic-bezier(0.55, 0, 0, 1) stroke-dashoffset;
+        stroke-dashoffset: 0;
+    }
+
+    .controls {
+        margin-right: 10px;
     }
 </style>

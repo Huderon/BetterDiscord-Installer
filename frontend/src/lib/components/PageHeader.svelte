@@ -26,7 +26,7 @@
 <style>
     .page-header {
         white-space: nowrap;
-        overflow: hidden;
+        /* overflow: hidden; */
         text-overflow: ellipsis;
         display: flex;
         align-items: center;
