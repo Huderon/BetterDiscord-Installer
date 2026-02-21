@@ -10,8 +10,8 @@
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
         "@types/bun": "^1.3.9",
         "@zerebos/eslint-config": "^1.0.2",
-        "@zerebos/eslint-config-svelte": "^1.0.2",
-        "@zerebos/eslint-config-typescript": "^1.0.2",
+        "@zerebos/eslint-config-svelte": "^1.0.3",
+        "@zerebos/eslint-config-typescript": "^1.0.3",
         "eslint": "^10.0.0",
         "focus-visible": "^5.2.1",
         "globals": "^17.3.0",
@@ -210,9 +210,9 @@
 
     "@zerebos/eslint-config": ["@zerebos/eslint-config@1.0.2", "", { "dependencies": { "@eslint/js": "^10.0.1", "globals": "^17.3.0" }, "peerDependencies": { "eslint": ">=9.0.0" } }, "sha512-l+rXuWCnID1VKzbH5MEXsdHvZKc+nmsAU0p9cMW7lFgATWYUhBIFOKAAw4iXh7C+WwDwoyWHEKeUB1vs6iH+iQ=="],
 
-    "@zerebos/eslint-config-svelte": ["@zerebos/eslint-config-svelte@1.0.2", "", { "dependencies": { "eslint-plugin-svelte": "^3.15.0", "typescript-eslint": "^8.56.0" }, "peerDependencies": { "eslint": ">=9.0.0" } }, "sha512-dHFw0y/xUcB546nHlG6go4hO7h1jOPKew9SjsyEP1NJhhZIFSug8ivei/bxFyEs8GMCcyYQ2XYzLY+6oT7azQw=="],
+    "@zerebos/eslint-config-svelte": ["@zerebos/eslint-config-svelte@1.0.3", "", { "dependencies": { "eslint-plugin-svelte": "^3.15.0", "typescript-eslint": "^8.56.0" }, "peerDependencies": { "eslint": ">=9.0.0" } }, "sha512-Pf66UfeoZKcY/ECVp3rQQz9HnOZo/71ntMpDuapq+7Ghkk5W+K7BDPDn0rqHaRDhh6dl9r3sOZgleFlnsay6Rw=="],
 
-    "@zerebos/eslint-config-typescript": ["@zerebos/eslint-config-typescript@1.0.2", "", { "dependencies": { "typescript-eslint": "^8.56.0" }, "peerDependencies": { "eslint": ">=9.0.0" } }, "sha512-PIWeFLXdYv3wS/sg27+udHDC4Y9xXeWTsgLXN56mWx9RXwxPhE30uabfEzA6hBzg12q1jo7yA/VOk7mPd79G2A=="],
+    "@zerebos/eslint-config-typescript": ["@zerebos/eslint-config-typescript@1.0.3", "", { "dependencies": { "typescript-eslint": "^8.56.0" }, "peerDependencies": { "eslint": ">=9.0.0" } }, "sha512-nLaLb79n80ya0/zPt5gcbyAGeCZ7fzHNH1KuosV+v36P+p5PrP03ZqupUwm5OoABKRPyL5CEsY8Cro26xHmm8Q=="],
 
     "acorn": ["acorn@8.16.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw=="],
 
