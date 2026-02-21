@@ -27,13 +27,13 @@
 
 # Overview
 
-This repository contains the source code for the BetterDiscord installer. This installer is written with [electron-webpack](https://webpack.electron.build/) and [Svelte 3](https://svelte.dev/).
+This repository contains the source code for the BetterDiscord installer. The app is built with [Wails](https://wails.io/) (Go backend + Svelte frontend) and ships as a native desktop application.
 
 ## Downloads
 
 These will link you to the latest builds found in the [releases](https://github.com/BetterDiscord/installer/releases/) tab of this repository.
 
-| [Windows (7+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Windows.exe)  | [macOS (10.10+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Mac.zip) | [Linux](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Linux.AppImage) |
+| [Windows (7+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Windows.exe)  | [macOS (10.10+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Mac.zip) | [Linux](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Linux |
 | ------------- | ------------- | ------------- |
 
 
@@ -42,19 +42,13 @@ These will link you to the latest builds found in the [releases](https://github.
 
 ```
 .
-├──assets                  // Contains static assets (such as images) used by the installer.
-|  └──images               // Images (logos, backgrounds, etc...) used by the installer.
-├──scripts                 // Scripts needed for development and contributing.
-└──src                     // The installer's source code.
-    ├──main                // Electron "main" process. Creates and configures the BrowserWindow.
-    └──renderer            // Electron "renderer" process. Contains most components and scripts.
-        ├──actions         // Scripts performed by the installer such as installing, repairing and uninstalling.
-        |  └──utils        // Common utilities used by installer actions (such as killing discord).
-        ├──common          // Common UI components such as buttons, checkboxes, radios, etc...
-        ├──pages           // Component files for each page in the installer's setup process.
-        ├──stores          // Svelte store used for storing global data.
-        |  └──types        // Used for defining custom svelte stores.
-        └──transitions     // Contains custom Svelte transitions and animations.
+├── api                     // Wails bindings and backend runtime helpers.
+├── build                   // Build assets and platform-specific packaging files.
+├── frontend                // Svelte UI bundled by Vite (Bun-powered).
+├── types                   // Shared Go types used by bindings.
+├── utils                   // Backend utilities.
+├── main.go                 // Wails application entry point.
+├── wails.json              // Wails configuration + frontend hooks.
 ```
 
 ---
@@ -65,9 +59,22 @@ These will link you to the latest builds found in the [releases](https://github.
 
 ## Prerequisites
 - [Git](https://git-scm.com)
-- [Node.js](https://nodejs.org/en/)
-- [yarn](https://yarnpkg.com)
+- [Go](https://go.dev/) (matches `go.mod`)
+- [Bun](https://bun.sh/)
+- [Wails CLI](https://wails.io/docs/gettingstarted/installation)
 - Command line of your choice.
+
+### Linux prerequisites
+
+Wails requires additional system packages on Linux (GTK/WebKit and build tooling). See the official Wails Linux dependencies guide:
+
+https://wails.io/docs/gettingstarted/installation#linux
+
+Fedora note: you may need to set `PKG_CONFIG_PATH` to include system pkgconfig directories:
+
+```sh
+export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/share/pkgconfig"
+```
 
 ## Building
 
@@ -77,31 +84,39 @@ git clone https://github.com/BetterDiscord/installer && cd installer
 ```
 This will create a local copy of this repository and navigate you to the root folder of the repository.
 
-### 2: Install Dependencies
-Run this command at the root folder to install dependencies:
+### Quick Start (Development)
+
+To run the installer locally with backend bindings:
+
 ```ps
-yarn install
+wails dev
 ```
 
-### 3: Run Build Script
-To run the installer in development mode, simply run the following command:
+To build a distributable binary:
+
 ```ps
-yarn dev
+wails build
 ```
 
 ## Additional Scripts
 
-### Linting
-This project uses [ESLint](https://eslint.org/). Run this command to lint your changes:
-```ps
-yarn lint
-```
-
-### Compiling & Distribution
+### Frontend checks
 
 ```ps
-yarn dist
+cd frontend
+bun install
+bun run --bun svelte-kit sync
+bun run --bun svelte-check --tsconfig ./tsconfig.json
+bun run --bun eslint .
 ```
+
+### Backend checks
+
+```ps
+go test ./...
+gofmt -w .
+```
+
 
 ---
 
