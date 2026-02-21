@@ -54,6 +54,20 @@
         }
     }
 
+    async function tryGoNext(event: KeyboardEvent) {
+        if (!canGoNext) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+         await goToNext();
+    }
+
+    async function tryGoPrevious(event: KeyboardEvent) {
+        if (!canGoPrevious) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+         await goBack();
+    }
+
 </script>
 
 <svelte:window on:keydown={navigatePage} />
@@ -61,10 +75,10 @@
 <footer class="install-footer">
     <SocialLinks />
     <ButtonGroup>
-        <Button style="secondary" disabled={previousDisabled} onclick={goBack}>
+        <Button style="secondary" disabled={previousDisabled} onclick={goBack} onkeypress={tryGoNext}>
             {previousLabel}
         </Button>
-        <Button style="primary" disabled={nextDisabled} onclick={goToNext}>
+        <Button style="primary" disabled={nextDisabled} onclick={goToNext} onkeypress={tryGoPrevious}>
             {nextLabel}
         </Button>
     </ButtonGroup>

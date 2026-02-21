@@ -6,8 +6,15 @@
     const {macButtons}: {macButtons: boolean} = $props();
 
     let version = $state("");
-    // eslint-disable-next-line new-cap
+    try {
+            // eslint-disable-next-line new-cap
     void GetVersion().then((v) => version = v);
+    }
+    catch {
+        // Probably not running in Wails, fallback to development version
+        version = "development";
+    }
+
 </script>
 
 <header class="titlebar" class:type-mac={macButtons === true} class:type-standard={macButtons !== true}>
