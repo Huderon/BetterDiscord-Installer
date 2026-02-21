@@ -110,11 +110,19 @@ bun run --bun svelte-check --tsconfig ./tsconfig.json
 bun run --bun eslint .
 ```
 
+### Frontend tests
+
+```ps
+cd frontend
+bun install
+bun run test
+```
+
 ### Backend checks
 
 ```ps
 go test ./...
-gofmt -w .
+go fmt ./...
 ```
 
 

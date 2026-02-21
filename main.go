@@ -43,11 +43,11 @@ func main() {
 			log.SetOutput(controller)
 			log.SetFlags(0) // Don't add date/time
 		},
-		Bind: []interface{}{
+		Bind: []any{
 			app,
 			controller,
 		},
-		EnumBind: []interface{}{
+		EnumBind: []any{
 			types.Channels,
 		},
 	})

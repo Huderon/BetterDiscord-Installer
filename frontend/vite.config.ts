@@ -1,3 +1,5 @@
+// eslint-disable-next-line spaced-comment
+/// <reference types="vitest/config" />
 import fs from "fs";
 import path from "path";
 import {defineConfig} from "vite";
@@ -12,4 +14,10 @@ export default defineConfig({
     define: {
         __INSTALLER_LICENSE__: JSON.stringify(license)
     },
+    resolve: process.env.VITEST ? {conditions: ["browser"]} : undefined,
+    test: {
+        environment: "jsdom",
+        setupFiles: ["src/setupTests.ts"],
+        include: ["src/**/*.{test,spec}.{js,ts}", "src/**/*.{test,spec}.svelte"],
+    }
 });
