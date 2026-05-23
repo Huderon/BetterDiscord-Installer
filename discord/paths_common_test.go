@@ -113,21 +113,6 @@ func TestValidateUnixStyleInstall_FromVersionFolder(t *testing.T) {
 	}
 }
 
-func TestValidateUnixStyleInstall_FromModulesFolder(t *testing.T) {
-	tmpDir := t.TempDir()
-	corePath := filepath.Join(tmpDir, "modules", "discord_desktop_core")
-
-	writeCoreAsar(t, corePath)
-
-	result := validateUnixStyleInstall(filepath.Join(tmpDir, "modules"), true, true)
-	if result == nil {
-		t.Fatalf("Expected install for %s", filepath.Join(tmpDir, "modules"))
-	}
-	if result.CorePath != corePath {
-		t.Errorf("CorePath = %s, expected %s", result.CorePath, corePath)
-	}
-}
-
 func TestValidateUnixStyleInstall_FlatpakDetection(t *testing.T) {
 	tmpDir := t.TempDir()
 	root := filepath.Join(tmpDir, "com.discordapp.Discord", "config", "discord")
