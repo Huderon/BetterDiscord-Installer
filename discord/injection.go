@@ -5,7 +5,6 @@ import (
 	"installer/betterdiscord"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -14,14 +13,6 @@ import (
 var injectionScript string
 
 func (discord *DiscordInstall) inject(bd *betterdiscord.BDInstall) error {
-	if discord.IsFlatpak {
-		cmd := exec.Command("flatpak", "--user", "override", "com.discordapp."+discord.Channel.Exe(), "--filesystem="+bd.Root())
-		if err := cmd.Run(); err != nil {
-			log.Printf("❌ Could not give flatpak access to %s\n", bd.Root())
-			log.Printf("   %s\n", err.Error())
-			return err
-		}
-	}
 
 	if err := os.WriteFile(filepath.Join(discord.CorePath, "index.js"), []byte(injectionScript), 0755); err != nil {
 		log.Printf("❌ Unable to write index.js in %s\n", discord.CorePath)

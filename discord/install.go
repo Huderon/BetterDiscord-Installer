@@ -3,8 +3,8 @@ package discord
 import (
 	"installer/betterdiscord"
 	"installer/types"
+	"installer/utils"
 	"log"
-	"path/filepath"
 )
 
 type DiscordInstall struct {
@@ -91,9 +91,18 @@ func (discord *DiscordInstall) RepairBD(options types.RepairOptions) error {
 	// Gets the global BetterDiscord install
 	bd := betterdiscord.GetInstallation()
 
-	// Snaps get their own local BD install
-	if discord.IsSnap {
-		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
+	// Snaps and flatpaks get their own local BD install
+	if discord.IsSnap || discord.IsFlatpak {
+		segment := "config"
+		if discord.IsSnap {
+			segment = ".config"
+		}
+
+		configPath, err := utils.FindSegment(discord.CorePath, segment)
+		if err != nil {
+			return nil
+		}
+		bd = betterdiscord.GetInstallation(configPath)
 	}
 
 	if err := bd.Repair(discord.Channel, options); err != nil {
@@ -107,9 +116,18 @@ func (discord *DiscordInstall) GetBetterDiscordInstall() *betterdiscord.BDInstal
 	// Gets the global BetterDiscord install
 	bd := betterdiscord.GetInstallation()
 
-	// Snaps get their own local BD install
-	if discord.IsSnap {
-		bd = betterdiscord.GetInstallation(filepath.Clean(filepath.Join(discord.CorePath, "..", "..", "..", "..")))
+	// Snaps and flatpaks get their own local BD install
+	if discord.IsSnap || discord.IsFlatpak {
+		segment := "config"
+		if discord.IsSnap {
+			segment = ".config"
+		}
+
+		configPath, err := utils.FindSegment(discord.CorePath, segment)
+		if err != nil {
+			return nil
+		}
+		bd = betterdiscord.GetInstallation(configPath)
 	}
 
 	return bd
