@@ -25,14 +25,14 @@ jobs:
           - macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Linux dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get -yq update && sudo apt-get -yq install libgtk-3-0 libwebkit2gtk-4.1-dev gcc-aarch64-linux-gnu
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload Linux binary
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-linux
           path: build/bin/BetterDiscord-Installer
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload Windows binary
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-windows
           path: build/bin/BetterDiscord-Installer.exe
@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload macOS app
         if: ${{ matrix.os == 'macos-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-macos
           path: build/bin/BetterDiscord-Installer.app
@@ -105,19 +105,19 @@ jobs:
     needs: build
     steps:
       - name: Download Linux artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-linux
           path: release
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-macos
           path: release
 
       - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-windows
           path: release
