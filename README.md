@@ -2,13 +2,17 @@
 
 <p align="center">
   <a href="#overview">Overview</a> |
-  <a href="#development">Development</a> |
+  <a href="#compatibility-matrix">Compatibility</a> |
+  <a href="#downloads">Downloads</a> |
   <a href="#faq">FAQ</a> |
-  <a href="#contributors">Contributors</a>
+  <a href="#development">Development</a> |
+  <a href="#contributing">Contributing</a>
 </p>
 
+---
+
 <p align="center">
-  <img alt="Preview" width="524" src="https://i.imgur.com/evmFCAf.png"/>
+  <img alt="Preview" width="524" height="322" src="https://i.imgur.com/evmFCAf.png"/>
   <br/>
   A simple standalone program which automates the installation, removal and maintenance of <a href="https://github.com/BetterDiscord/BetterDiscord">BetterDiscord</a>.
   <br/>
@@ -30,8 +34,6 @@
 
 This repository contains the source code for the BetterDiscord installer. The app is built with [Wails](https://wails.io/) (Go backend + Svelte frontend) and ships as a native desktop application.
 
-Minimum supported OS versions track Discord's currently supported desktop platforms.
-
 ## Compatibility Matrix
 
 | Platform | Minimum Version / Install Type | Support Status | Notes |
@@ -40,11 +42,7 @@ Minimum supported OS versions track Discord's currently supported desktop platfo
 | macOS | macOS 14+ | ✅ | Older macOS versions are not supported. |
 | Linux | Native Discord install | ✅ | Standard package-manager installs are supported. |
 | Linux | Flatpak Discord install | ✅ | Flatpak-based Discord installs are supported. |
-| Linux | Snapcraft Discord install | ❌ | Unsupported due to upstream Snap packaging/runtime changes. |
-
-## Unsupported Configurations
-
-- Linux Snapcraft Discord installs are not supported due to upstream Snap packaging/runtime changes in Discord.
+| Linux | Snap Discord install | ❌ | Unsupported due to upstream Snap packaging/runtime changes. |
 
 ## Downloads
 
@@ -79,9 +77,14 @@ ln -s "${XDG_CONFIG_HOME:-$HOME/.config}/BetterDiscord" "$HOME/.var/app/com.disc
 
 Replace `com.discordapp.Discord` with your Discord Flatpak app ID if it differs on your system.
 
-## Codebase
+## Development
 
-```
+### Codebase Overview
+
+<details>
+<summary>Show Codebase Structure</summary>
+
+```text
 .
 ├── api                     // Wails bindings and backend runtime helpers.
 ├── build                   // Build assets and platform-specific packaging files.
@@ -92,24 +95,18 @@ Replace `com.discordapp.Discord` with your Discord Flatpak app ID if it differs 
 ├── wails.json              // Wails configuration + frontend hooks.
 ```
 
----
+</details>
 
-# Development
-
-> This is a tutorial designed for people looking to contribute to, or work directly with the installer's source code. If you are just looking to download and install BetterDiscord, visit the [releases](https://github.com/BetterDiscord/installer/releases/) page of this repository.
-
-## Prerequisites
+### Prerequisites
 - [Git](https://git-scm.com)
 - [Go](https://go.dev/) (matches `go.mod`)
 - [Bun](https://bun.sh/)
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation)
-- Command line of your choice.
+- Command line of your choice
 
-### Linux prerequisites
+### Linux Prerequisites
 
-Wails requires additional system packages on Linux (GTK/WebKit and build tooling). See the official Wails Linux dependencies guide:
-
-https://wails.io/docs/gettingstarted/installation#linux
+Wails requires additional system packages on Linux (GTK/WebKit and build tooling). See the official Wails Linux dependencies guide: https://wails.io/docs/gettingstarted/installation#linux
 
 Fedora note: you may need to set `PKG_CONFIG_PATH` to include system pkgconfig directories:
 
@@ -117,33 +114,24 @@ Fedora note: you may need to set `PKG_CONFIG_PATH` to include system pkgconfig d
 export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/share/pkgconfig"
 ```
 
-## Building
+### Building
 
-### 1. Clone the repository
-```ps
+#### Quick Start
+
+```bash
+# Clone and navigate to the repository
 git clone https://github.com/BetterDiscord/installer && cd installer
-```
-This will create a local copy of this repository and navigate you to the root folder of the repository.
 
-### Quick Start (Development)
-
-To run the installer locally with backend bindings:
-
-```ps
+# Run in development mode with backend bindings
 wails dev
-```
 
-To build a distributable binary:
-
-```ps
+# Build a distributable binary
 wails build
 ```
 
-## Additional Scripts
+#### Frontend Checks
 
-### Frontend checks
-
-```ps
+```bash
 cd frontend
 bun install
 bun run --bun svelte-kit sync
@@ -151,28 +139,37 @@ bun run --bun svelte-check --tsconfig ./tsconfig.json
 bun run --bun eslint .
 ```
 
-### Frontend tests
+#### Frontend Tests
 
-```ps
+```bash
 cd frontend
 bun install
 bun run test
 ```
 
-### Backend checks
+#### Backend Checks
 
-```ps
+```bash
 go test ./...
 gofmt -w .
 ```
 
+## Contributing
 
----
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-# Contributors
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
 <a href="https://github.com/betterdiscord/installer/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=betterdiscord/installer" />
 </a>
+
+---
+
+Made with ❤️ by the BetterDiscord Team
