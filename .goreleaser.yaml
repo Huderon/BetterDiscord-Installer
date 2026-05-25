@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# GoReleaser v2 configuration for BetterDiscord Installer (Wails)
+version: 2
+
+project_name: BetterDiscord-Installer
+
+# Wails relies on CGO and native toolchains, so releases should run on native OS runners.
+# This config intentionally keeps packaging simple and stable-channel focused.
+before:
+  hooks:
+    - go mod download
+    - cd frontend && bun install --frozen-lockfile
+    - cd frontend && bun run build
+
+builds:
+  - id: installer-linux
+    main: .
+    binary: BetterDiscord-Installer
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    tags:
+      - webkit2_41
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Tag }}
+
+  - id: installer-windows
+    main: .
+    binary: BetterDiscord-Installer
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -H=windowsgui
+      - -X main.version={{ .Tag }}
+
+  - id: installer-darwin
+    main: .
+    binary: BetterDiscord-Installer
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Tag }}
+
+archives:
+  # Keep Linux/macOS in zip archives to preserve executable metadata and provide a clean download.
+  - id: portable-archives
+    ids:
+      - installer-linux
+      - installer-darwin
+    formats:
+      - zip
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - src: README.md
+      - src: LICENSE
+
+  # Keep Windows as a raw .exe as requested.
+  - id: windows-raw
+    ids:
+      - installer-windows
+    formats:
+      - binary
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  draft: true
+  prerelease: auto
+  mode: replace
+  header: |
+    ## BetterDiscord Installer {{ .Tag }}
+  footer: |
+    **Full Changelog**: https://github.com/BetterDiscord/Installer/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+git:
+  ignore_tags:
+    - nightly
+
+# Optional publisher integrations to enable later:
+# 1) homebrew_casks (if you want the GUI app distributed via your tap)
+# 2) winget (portable package pointing at the Windows .exe)
+#
+# Reusing repository metadata from your CLI setup is straightforward once you're ready to turn these on.
