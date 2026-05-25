@@ -3,11 +3,12 @@
 <p align="center">
   <a href="#overview">Overview</a> |
   <a href="#development">Development</a> |
+  <a href="#faq">FAQ</a> |
   <a href="#contributors">Contributors</a>
 </p>
 
 <p align="center">
-  <img alt="Preview" width="524" alt="Hero image" src="https://i.imgur.com/evmFCAf.png"/>
+  <img alt="Preview" width="524" src="https://i.imgur.com/evmFCAf.png"/>
   <br/>
   A simple standalone program which automates the installation, removal and maintenance of <a href="https://github.com/BetterDiscord/BetterDiscord">BetterDiscord</a>.
   <br/>
@@ -29,14 +30,7 @@
 
 This repository contains the source code for the BetterDiscord installer. The app is built with [Wails](https://wails.io/) (Go backend + Svelte frontend) and ships as a native desktop application.
 
-## Downloads
-
-These will link you to the latest builds found in the [releases](https://github.com/BetterDiscord/installer/releases/) tab of this repository.
-
-| [Windows (11+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Windows.exe)  | [macOS (14+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Mac.zip) | [Linux](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Linux) |
-| ------------- | ------------- | ------------- |
-
-Supported platforms follow modern Discord-supported OS versions. On Linux, the installer supports native Discord installs and Flatpak Discord installs, but does not support Snapcraft Discord installs due to upstream Snap packaging/runtime changes.
+Minimum supported OS versions track Discord's currently supported desktop platforms.
 
 ## Compatibility Matrix
 
@@ -48,7 +42,42 @@ Supported platforms follow modern Discord-supported OS versions. On Linux, the i
 | Linux | Flatpak Discord install | ✅ | Flatpak-based Discord installs are supported. |
 | Linux | Snapcraft Discord install | ❌ | Unsupported due to upstream Snap packaging/runtime changes. |
 
+## Unsupported Configurations
 
+- Linux Snapcraft Discord installs are not supported due to upstream Snap packaging/runtime changes in Discord.
+
+## Downloads
+
+These links point to the latest builds in the [releases](https://github.com/BetterDiscord/installer/releases/) tab of this repository.
+
+| [Windows (11+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Windows.exe)  | [macOS (14+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Mac.zip) | [Linux](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Linux) |
+| ------------- | ------------- | ------------- |
+
+## FAQ
+
+### Does the installer support Flatpak Discord on Linux?
+
+Yes. Flatpak Discord installs are supported.
+
+### Why is Snap Discord unsupported on Linux?
+
+Discord Snap packaging/runtime changes prevent the installer from supporting Snap installs.
+
+### How can I use the global BetterDiscord folder with Flatpak?
+
+1. Grant the Flatpak app access to the BetterDiscord config directory:
+
+```sh
+flatpak --user override com.discordapp.Discord --filesystem=xdg-config/BetterDiscord:rw
+```
+
+2. Symlink the BetterDiscord folder into the Flatpak app config:
+
+```sh
+ln -s "${XDG_CONFIG_HOME:-$HOME/.config}/BetterDiscord" "$HOME/.var/app/com.discordapp.Discord/config/BetterDiscord"
+```
+
+Replace `com.discordapp.Discord` with your Discord Flatpak app ID if it differs on your system.
 
 ## Codebase
 
@@ -90,7 +119,7 @@ export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/share/pkgconfig"
 
 ## Building
 
-### 1: Clone the repository.
+### 1. Clone the repository
 ```ps
 git clone https://github.com/BetterDiscord/installer && cd installer
 ```
@@ -134,7 +163,7 @@ bun run test
 
 ```ps
 go test ./...
-go fmt ./...
+gofmt -w .
 ```
 
 
