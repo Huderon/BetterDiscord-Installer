@@ -14,6 +14,7 @@ before:
 
 builds:
   - id: installer-linux
+    skip: "{{ ne .Env.RELEASE_OS \"linux\" }}"
     main: .
     binary: BetterDiscord-Installer
     env:
@@ -22,7 +23,6 @@ builds:
       - linux
     goarch:
       - amd64
-      - arm64
     tags:
       - webkit2_41
     ldflags:
@@ -30,6 +30,7 @@ builds:
       - -X main.version={{ .Tag }}
 
   - id: installer-windows
+    skip: "{{ ne .Env.RELEASE_OS \"windows\" }}"
     main: .
     binary: BetterDiscord-Installer
     env:
@@ -38,13 +39,13 @@ builds:
       - windows
     goarch:
       - amd64
-      - arm64
     ldflags:
       - -s -w
       - -H=windowsgui
       - -X main.version={{ .Tag }}
 
   - id: installer-darwin
+    skip: "{{ ne .Env.RELEASE_OS \"darwin\" }}"
     main: .
     binary: BetterDiscord-Installer
     env:
@@ -53,7 +54,6 @@ builds:
       - darwin
     goarch:
       - amd64
-      - arm64
     ldflags:
       - -s -w
       - -X main.version={{ .Tag }}
@@ -82,12 +82,12 @@ archives:
       {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
 
 checksum:
-  name_template: checksums.txt
+  name_template: checksums_{{ .Env.RELEASE_OS }}.txt
 
 release:
   draft: true
   prerelease: auto
-  mode: replace
+  mode: keep-existing
   header: |
     ## BetterDiscord Installer {{ .Tag }}
   footer: |
@@ -108,8 +108,48 @@ git:
   ignore_tags:
     - nightly
 
-# Optional publisher integrations to enable later:
-# 1) homebrew_casks (if you want the GUI app distributed via your tap)
-# 2) winget (portable package pointing at the Windows .exe)
-#
-# Reusing repository metadata from your CLI setup is straightforward once you're ready to turn these on.
+homebrew_casks:
+  - name: betterdiscord-installer
+    description: "A simple standalone program to install, repair, and uninstall BetterDiscord."
+    homepage: "https://betterdiscord.app/"
+    license: "MIT"
+    binaries: [BetterDiscord-Installer]
+    commit_author:
+      name: zerebos
+      email: 6865942+zerebos@users.noreply.github.com
+    repository:
+      owner: BetterDiscord
+      name: homebrew-tap
+      branch: main
+      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+
+winget:
+  - name: BetterDiscord Installer
+    package_identifier: BetterDiscord.Installer
+    author: BetterDiscord
+    release_notes: "{{ .Changelog }}"
+    release_notes_url: https://github.com/BetterDiscord/Installer/releases/tag/{{ .Tag }}
+    publisher: "BetterDiscord"
+    publisher_url: "https://github.com/BetterDiscord"
+    publisher_support_url: "https://github.com/BetterDiscord/Installer/issues"
+    license: "MIT"
+    license_url: "https://github.com/BetterDiscord/Installer/blob/main/LICENSE"
+    short_description: "A standalone GUI installer for BetterDiscord."
+    homepage: "https://betterdiscord.app/"
+    tags: [gui, installer, discord, betterdiscord]
+    url_template: "https://github.com/BetterDiscord/Installer/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    commit_author:
+      name: zerebos
+      email: 6865942+zerebos@users.noreply.github.com
+    repository:
+      owner: betterdiscord
+      name: winget-pkgs
+      branch: installer-{{ .Tag }}-{{ .Now.Format "20060102150405" }}
+      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+      pull_request:
+        enabled: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+        draft: false
