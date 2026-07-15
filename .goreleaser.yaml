@@ -9,12 +9,11 @@ project_name: BetterDiscord-Installer
 before:
   hooks:
     - go mod download
-    - cd frontend && bun install --frozen-lockfile
-    - cd frontend && bun run build
+    - sh ./scripts/build-frontend.sh
 
 builds:
   - id: installer-linux
-    skip: "{{ ne .Env.RELEASE_OS \"linux\" }}"
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "linux" }}'
     main: .
     binary: BetterDiscord-Installer
     env:
@@ -24,28 +23,34 @@ builds:
     goarch:
       - amd64
     tags:
+      - desktop
+      - production
       - webkit2_41
     ldflags:
       - -s -w
       - -X main.version={{ .Tag }}
 
   - id: installer-windows
-    skip: "{{ ne .Env.RELEASE_OS \"windows\" }}"
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "windows" }}'
     main: .
     binary: BetterDiscord-Installer
+    # Wails on Windows uses go-webview2 (pure Go), so no CGO needed.
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     goos:
       - windows
     goarch:
       - amd64
+    tags:
+      - desktop
+      - production
     ldflags:
       - -s -w
       - -H=windowsgui
       - -X main.version={{ .Tag }}
 
   - id: installer-darwin
-    skip: "{{ ne .Env.RELEASE_OS \"darwin\" }}"
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "darwin" }}'
     main: .
     binary: BetterDiscord-Installer
     env:
@@ -54,16 +59,28 @@ builds:
       - darwin
     goarch:
       - amd64
+      - arm64
+    tags:
+      - desktop
+      - production
     ldflags:
       - -s -w
       - -X main.version={{ .Tag }}
+
+# Merge the two macOS arch builds into a single universal binary so one
+# download (and one homebrew cask URL) serves both Intel and Apple Silicon.
+universal_binaries:
+  - id: installer-darwin-universal
+    ids:
+      - installer-darwin
+    replace: true
 
 archives:
   # Keep Linux/macOS in zip archives to preserve executable metadata and provide a clean download.
   - id: portable-archives
     ids:
       - installer-linux
-      - installer-darwin
+      - installer-darwin-universal
     formats:
       - zip
     name_template: >-
@@ -82,10 +99,9 @@ archives:
       {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
 
 checksum:
-  name_template: checksums_{{ .Env.RELEASE_OS }}.txt
+  name_template: checksums_{{ envOrDefault "RELEASE_OS" .Runtime.Goos }}.txt
 
 release:
-  draft: true
   prerelease: auto
   mode: keep-existing
   header: |
@@ -114,6 +130,8 @@ homebrew_casks:
     homepage: "https://betterdiscord.app/"
     license: "MIT"
     binaries: [BetterDiscord-Installer]
+    # Don't publish prereleases (e.g. v2.0.0-alpha.1) to the tap.
+    skip_upload: auto
     commit_author:
       name: zerebos
       email: 6865942+zerebos@users.noreply.github.com
@@ -138,6 +156,8 @@ winget:
     homepage: "https://betterdiscord.app/"
     tags: [gui, installer, discord, betterdiscord]
     url_template: "https://github.com/BetterDiscord/Installer/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # Don't open winget-pkgs PRs for prereleases (e.g. v2.0.0-alpha.1).
+    skip_upload: auto
     commit_author:
       name: zerebos
       email: 6865942+zerebos@users.noreply.github.com
