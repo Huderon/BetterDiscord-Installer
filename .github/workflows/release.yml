@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Linux dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get -yq update && sudo apt-get -yq install libgtk-3-0 libwebkit2gtk-4.1-dev gcc-aarch64-linux-gnu
+        run: sudo apt-get -yq update && sudo apt-get -yq install libgtk-3-dev libwebkit2gtk-4.1-dev
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -50,11 +50,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: '~> v2'
           args: release --clean --skip=${{ matrix.skip_flags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
           RELEASE_OS: ${{ matrix.release_os }}
