@@ -48,6 +48,10 @@ builds:
       - -s -w
       - -H=windowsgui
       - -X main.version={{ .Tag }}
+    hooks:
+      # go build doesn't compile the icon/manifest/version resources that
+      # `wails build` would; generate the .syso ourselves so it gets linked.
+      pre: go run ./scripts/winres -version {{ .Version }}
 
   - id: installer-darwin
     skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "darwin" }}'
@@ -69,18 +73,26 @@ builds:
 
 # Merge the two macOS arch builds into a single universal binary so one
 # download (and one homebrew cask URL) serves both Intel and Apple Silicon.
+# The slashed name places the binary at its .app bundle location, so the
+# darwin archive below only needs to add Info.plist and the icon to form a
+# complete "BetterDiscord Installer.app".
 universal_binaries:
   - id: installer-darwin-universal
     ids:
       - installer-darwin
+    name_template: BetterDiscord Installer.app/Contents/MacOS/BetterDiscord-Installer
     replace: true
+    hooks:
+      # Render Info.plist with the release version for the .app archive below.
+      # Runs here (not in before.hooks) because dist/ must not exist yet when
+      # GoReleaser starts, and this pipe only runs on the darwin leg anyway.
+      post: sh ./scripts/render-plist.sh {{ .Version }}
 
 archives:
-  # Keep Linux/macOS in zip archives to preserve executable metadata and provide a clean download.
-  - id: portable-archives
+  # Keep Linux in a zip archive to preserve executable metadata and provide a clean download.
+  - id: linux-zip
     ids:
       - installer-linux
-      - installer-darwin-universal
     formats:
       - zip
     name_template: >-
@@ -88,6 +100,19 @@ archives:
     files:
       - src: README.md
       - src: LICENSE
+
+  # macOS ships as a proper .app bundle inside the zip.
+  - id: darwin-app
+    ids:
+      - installer-darwin-universal
+    formats:
+      - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_darwin_universal"
+    files:
+      - src: dist/darwin/Info.plist
+        dst: BetterDiscord Installer.app/Contents/Info.plist
+      - src: build/darwin/icon.icns
+        dst: BetterDiscord Installer.app/Contents/Resources/iconfile.icns
 
   # Keep Windows as a raw .exe as requested.
   - id: windows-raw
@@ -129,7 +154,12 @@ homebrew_casks:
     description: "A simple standalone program to install, repair, and uninstall BetterDiscord."
     homepage: "https://betterdiscord.app/"
     license: "MIT"
-    binaries: [BetterDiscord-Installer]
+    # The archive contains a .app bundle; OSS GoReleaser only knows the
+    # `binary` stanza, so the app stanza is added via custom_block and the
+    # binary stanza doubles as a CLI shim pointing inside the installed app.
+    custom_block: |
+      app "BetterDiscord Installer.app"
+    binaries: ['#{appdir}/BetterDiscord Installer.app/Contents/MacOS/BetterDiscord-Installer']
     # Don't publish prereleases (e.g. v2.0.0-alpha.1) to the tap.
     skip_upload: auto
     commit_author:

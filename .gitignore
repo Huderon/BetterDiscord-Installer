@@ -11,3 +11,4 @@ snippets/
 !README.md
 !CONTRIBUTING.md
 *.log
+*.syso
