@@ -91,9 +91,11 @@ universal_binaries:
       # GoReleaser starts, and this pipe only runs on the darwin leg anyway.
       post: sh ./scripts/render-plist.sh {{ .Version }}
 
-# Artifact names intentionally exclude the version so that stable
-# releases/latest/download/... deep links (README, betterdiscord.app) keep
-# working across releases; the tag in the URL path identifies the version.
+# Artifact names intentionally exclude the version (so that stable
+# releases/latest/download/... deep links in the README and on
+# betterdiscord.app keep working across releases; the tag in the URL path
+# identifies the version) and the architecture (one artifact per OS, and
+# plain OS names are friendlier for non-technical downloaders).
 archives:
   # Keep Linux in a zip archive to preserve executable metadata and provide a clean download.
   - id: linux-zip
@@ -101,7 +103,7 @@ archives:
       - installer-linux
     formats:
       - zip
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-Linux"
     files:
       - src: README.md
       - src: LICENSE
@@ -112,7 +114,7 @@ archives:
       - installer-darwin-universal
     formats:
       - zip
-    name_template: "{{ .ProjectName }}_darwin_universal"
+    name_template: "{{ .ProjectName }}-Mac"
     files:
       - src: dist/darwin/Info.plist
         dst: BetterDiscord Installer.app/Contents/Info.plist
@@ -125,7 +127,7 @@ archives:
       - installer-windows
     formats:
       - binary
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-Windows"
 
 checksum:
   name_template: checksums_{{ envOrDefault "RELEASE_OS" .Runtime.Goos }}.txt

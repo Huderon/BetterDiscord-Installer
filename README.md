@@ -54,10 +54,10 @@ These links point to the latest builds in the [releases](https://github.com/Bett
 
 | Platform | Download |
 | --- | --- |
-| Windows | [BetterDiscord-Installer_windows_amd64.exe](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer_windows_amd64.exe) |
-| macOS | [BetterDiscord-Installer_darwin_universal.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer_darwin_universal.zip) |
-| Linux (AppImage) | [BetterDiscord-Installer_linux_amd64.AppImage](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer_linux_amd64.AppImage) |
-| Linux (zip) | [BetterDiscord-Installer_linux_amd64.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer_linux_amd64.zip) |
+| Windows | [BetterDiscord-Installer-Windows.exe](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Windows.exe) |
+| macOS | [BetterDiscord-Installer-Mac.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Mac.zip) |
+| Linux (AppImage) | [BetterDiscord-Installer-Linux.AppImage](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Linux.AppImage) |
+| Linux (zip) | [BetterDiscord-Installer-Linux.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Linux.zip) |
 
 Or install via a package manager:
 

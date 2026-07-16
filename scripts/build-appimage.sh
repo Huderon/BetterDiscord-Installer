@@ -37,4 +37,4 @@ fi
 
 # --appimage-extract-and-run avoids needing FUSE on CI runners.
 ARCH=x86_64 "$TOOL" --appimage-extract-and-run "$APPDIR" \
-    "$OUT_DIR/BetterDiscord-Installer_linux_amd64.AppImage"
+    "$OUT_DIR/BetterDiscord-Installer-Linux.AppImage"
