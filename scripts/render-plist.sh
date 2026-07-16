@@ -5,4 +5,4 @@ set -eu
 
 cd "$(dirname "$0")/.."
 mkdir -p dist/darwin
-sed "s/__VERSION__/${1:?version required}/g" build/darwin/Info.release.plist > dist/darwin/Info.plist
+sed "s|__VERSION__|${1:?version required}|g" build/darwin/Info.release.plist > dist/darwin/Info.plist

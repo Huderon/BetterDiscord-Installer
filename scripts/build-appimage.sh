@@ -31,8 +31,11 @@ EOF
 
 TOOL="$OUT_DIR/appimagetool"
 if [ ! -x "$TOOL" ]; then
-    curl -fsSL -o "$TOOL" "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
-    chmod +x "$TOOL"
+    # Download to a temp file first so an interrupted download can't leave a
+    # partial file behind that a later run would try to execute.
+    curl -fsSL -o "$TOOL.tmp" "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+    chmod +x "$TOOL.tmp"
+    mv "$TOOL.tmp" "$TOOL"
 fi
 
 # --appimage-extract-and-run avoids needing FUSE on CI runners.

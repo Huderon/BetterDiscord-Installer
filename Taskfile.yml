@@ -84,3 +84,4 @@ tasks:
     desc: Remove build output
     cmds:
       - rm -rf dist build/bin
+      - rm -f *.syso

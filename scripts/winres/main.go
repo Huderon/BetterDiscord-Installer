@@ -42,11 +42,12 @@ func main() {
 }
 
 func run(ver, out string) error {
-	// Assembly identity and fixed file versions must be numeric (x.y.z),
-	// so strip any prerelease suffix like "-alpha.1".
+	// Assembly identity and fixed file versions must be numeric (x.y.z), so
+	// strip any prerelease suffix like "-alpha.1". GoReleaser passes the
+	// version without the leading v, but tolerate one for manual invocations.
 	numeric := "0.0.0"
-	if m := regexp.MustCompile(`^\d+\.\d+\.\d+`).FindString(ver); m != "" {
-		numeric = m
+	if m := regexp.MustCompile(`^v?(\d+\.\d+\.\d+)`).FindStringSubmatch(ver); len(m) > 1 {
+		numeric = m[1]
 	}
 
 	rs := winres.ResourceSet{}
