@@ -29,6 +29,9 @@ builds:
     ldflags:
       - -s -w
       - -X main.version={{ .Tag }}
+    hooks:
+      # Also package the binary as an AppImage; uploaded via release.extra_files.
+      post: sh ./scripts/build-appimage.sh {{ .Path }}
 
   - id: installer-windows
     skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "windows" }}'
@@ -88,6 +91,9 @@ universal_binaries:
       # GoReleaser starts, and this pipe only runs on the darwin leg anyway.
       post: sh ./scripts/render-plist.sh {{ .Version }}
 
+# Artifact names intentionally exclude the version so that stable
+# releases/latest/download/... deep links (README, betterdiscord.app) keep
+# working across releases; the tag in the URL path identifies the version.
 archives:
   # Keep Linux in a zip archive to preserve executable metadata and provide a clean download.
   - id: linux-zip
@@ -95,8 +101,7 @@ archives:
       - installer-linux
     formats:
       - zip
-    name_template: >-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     files:
       - src: README.md
       - src: LICENSE
@@ -107,7 +112,7 @@ archives:
       - installer-darwin-universal
     formats:
       - zip
-    name_template: "{{ .ProjectName }}_{{ .Version }}_darwin_universal"
+    name_template: "{{ .ProjectName }}_darwin_universal"
     files:
       - src: dist/darwin/Info.plist
         dst: BetterDiscord Installer.app/Contents/Info.plist
@@ -120,8 +125,7 @@ archives:
       - installer-windows
     formats:
       - binary
-    name_template: >-
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
 
 checksum:
   name_template: checksums_{{ envOrDefault "RELEASE_OS" .Runtime.Goos }}.txt
@@ -129,6 +133,10 @@ checksum:
 release:
   prerelease: auto
   mode: keep-existing
+  extra_files:
+    # Built by scripts/build-appimage.sh on the linux leg; the wildcard glob
+    # safely matches nothing on the other OS legs.
+    - glob: dist/appimage/*.AppImage
   header: |
     ## BetterDiscord Installer {{ .Tag }}
   footer: |
