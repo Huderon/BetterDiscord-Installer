@@ -195,6 +195,9 @@ func validateUnixStyleInstall(proposed string, detectFlatpak bool, detectSnap bo
 		isFlatpak := false
 		isSnap := false
 
+		// Heuristic: infer the packaging format from the resolved path. These
+		// substring checks could in theory false-positive on an unusual custom
+		// path, but they match the real Flatpak/Snap layouts in practice.
 		if detectFlatpak {
 			isFlatpak = strings.Contains(finalPath, "com.discordapp.")
 		}

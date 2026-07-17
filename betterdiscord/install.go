@@ -1,13 +1,14 @@
 package betterdiscord
 
 import (
-	"installer/types"
-	"installer/utils"
-	"installer/wsl"
 	"log"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"installer/types"
+	"installer/utils"
+	"installer/wsl"
 )
 
 type BDInstall struct {

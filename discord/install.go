@@ -1,10 +1,11 @@
 package discord
 
 import (
+	"log"
+
 	"installer/betterdiscord"
 	"installer/types"
 	"installer/utils"
-	"log"
 )
 
 type DiscordInstall struct {

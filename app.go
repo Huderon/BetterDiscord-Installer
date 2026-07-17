@@ -38,6 +38,7 @@ func (a *App) CheckForUpdate() {
 	// Get latest installer version from GitHub API
 	apiData, err := utils.DownloadJSON[types.GitHubRelease]("https://api.github.com/repos/BetterDiscord/Installer/releases/latest")
 	if err != nil {
+		// Offline or GitHub API error — skip the update check silently.
 		return
 	}
 
@@ -60,6 +61,7 @@ func (a *App) CheckForUpdate() {
 	})
 
 	if err != nil {
+		// Dialog failed to display — don't block startup over it.
 		return
 	}
 

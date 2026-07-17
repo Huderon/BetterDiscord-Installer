@@ -1,12 +1,13 @@
 package betterdiscord
 
 import (
-	"installer/types"
-	"installer/utils"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"installer/types"
+	"installer/utils"
 )
 
 func makeDirectory(folder string) error {

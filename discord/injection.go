@@ -2,11 +2,12 @@ package discord
 
 import (
 	_ "embed"
-	"installer/betterdiscord"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"installer/betterdiscord"
 )
 
 //go:embed assets/injection.js

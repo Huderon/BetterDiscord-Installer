@@ -2,9 +2,10 @@ package betterdiscord
 
 import (
 	"fmt"
+	"log"
+
 	"installer/types"
 	"installer/utils"
-	"log"
 )
 
 // Endpoints for fetching the BetterDiscord asar. Declared as package vars so

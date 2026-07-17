@@ -1,10 +1,11 @@
 package discord
 
 import (
-	"installer/types"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"installer/types"
 )
 
 func init() {

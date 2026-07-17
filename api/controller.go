@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"installer/discord"
@@ -44,6 +45,9 @@ func (action *Controller) Install(corePaths []string, options types.InstallOptio
 		}
 
 		if err := install.InstallBD(options); err != nil {
+			// Surface the reason: some failures (e.g. GetBetterDiscordInstall's
+			// path resolution) return an error the inner calls didn't log.
+			log.Printf("❌ %s\n", err.Error())
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}
@@ -60,6 +64,7 @@ func (action *Controller) Uninstall(corePaths []string, options types.UninstallO
 		}
 
 		if err := install.UninstallBD(options); err != nil {
+			log.Printf("❌ %s\n", err.Error())
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}
@@ -76,6 +81,7 @@ func (action *Controller) Repair(corePaths []string, options types.RepairOptions
 		}
 
 		if err := install.RepairBD(options); err != nil {
+			log.Printf("❌ %s\n", err.Error())
 			runtime.EventsEmit(action.ctx, "failure")
 			return
 		}

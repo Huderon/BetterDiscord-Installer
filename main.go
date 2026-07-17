@@ -37,6 +37,10 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			app.SetContext(ctx)
 			controller.SetContext(ctx)
+			// Best-effort update check, kept early so it still runs even if a
+			// later startup step fails. It uses native dialogs (not the GUI log)
+			// and swallows its own errors, so running before the logger is wired
+			// up below is intentional and harmless.
 			app.CheckForUpdate()
 
 			// Setup default logger to send data to GUI
