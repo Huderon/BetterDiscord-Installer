@@ -16,9 +16,16 @@
 
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<label class="checkbox-container" onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)}>
+<label
+    class="checkbox-container"
+    onkeypress={(e: KeyboardEvent) => {
+        // Space toggles the checkbox natively; only handle Enter here so the two
+        // don't fight and double-toggle.
+        if (e.key === "Enter") handleKeyboardToggle(e, checkbox);
+    }}
+>
     <div class="checkbox-inner">
-        <input class="checkbox" type="checkbox" bind:this={checkbox} bind:checked {onchange} onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} />
+        <input class="checkbox" type="checkbox" bind:this={checkbox} bind:checked {onchange} />
         <svg class="checkbox-glyph" viewBox="0 0 24 24">
             <path d="M0.73, 11.91 8.1,19.28 22.79,4.59" fill="none" />
         </svg>

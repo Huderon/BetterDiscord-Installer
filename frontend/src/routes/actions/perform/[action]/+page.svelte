@@ -5,7 +5,7 @@
     import {onDestroy, onMount} from "svelte";
     import {EventsOn as listenFor, EventsOff as unlistenFor} from "@wails/runtime";
     import {goto} from "$app/navigation";
-    import {Install as install, Repair as repair, Uninstall as uninstall} from "$lib/wailsjs/go/api/Controller";
+    import {Install as install, Repair as repair, Uninstall as uninstall} from "@api";
     import Page from "$lib/components/Page.svelte";
     import type {DiscordChannel} from "$lib/types";
     import quit from "$lib/utils/quit";
@@ -44,14 +44,6 @@
     void goto(`/actions/configure/${payload.action}`);
     }
 
-    onMount(() => {
-        listenFor("log", (message: string) => log(message.trim()));
-        listenFor("success", () => succeed());
-        listenFor("failure", () => fail());
-        listenFor("reset", reset);
-        listenFor("navigate", handleNavigate);
-    });
-
     onDestroy(() => {
         unlistenFor("log");
         unlistenFor("success");
@@ -73,16 +65,26 @@
     log(`Starting ${currentAction}...`);
     log("");
 
-    // Run action scripts
-    if (currentAction === "install") {
-         void (install(Object.values(installPaths), app.options.install)).then(() => active = false);
-    }
-    if (currentAction === "repair") {
-        void (repair(Object.values(installPaths), app.options.repair)).then(() => active = false);
-    }
-    if (currentAction === "uninstall") {
-        void (uninstall(Object.values(installPaths), app.options.uninstall)).then(() => active = false);
-    }
+    onMount(() => {
+        // Register listeners before kicking off the action so no early
+        // log/success/failure/navigate event from the backend can be missed.
+        listenFor("log", (message: string) => log(message.trim()));
+        listenFor("success", () => succeed());
+        listenFor("failure", () => fail());
+        listenFor("reset", reset);
+        listenFor("navigate", handleNavigate);
+
+        // Run action scripts
+        if (currentAction === "install") {
+            void install(Object.values(installPaths), app.options.install).then(() => active = false);
+        }
+        else if (currentAction === "repair") {
+            void repair(Object.values(installPaths), app.options.repair).then(() => active = false);
+        }
+        else if (currentAction === "uninstall") {
+            void uninstall(Object.values(installPaths), app.options.uninstall).then(() => active = false);
+        }
+    });
 </script>
 
 

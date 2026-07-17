@@ -16,17 +16,12 @@
     let copyInputContainer: HTMLDivElement | undefined = $state();
     let copyButtonActive = $state(false);
     let copyButtonVisible = $state(false);
-    let shouldAutoscroll: boolean = $derived(autoscroll);
 
     // Copy button
     function copyDisplayContents() {
         if (!element) return;
         copyButtonActive = true;
-        const range = document.createRange();
-        range.selectNode(element);
-        window.getSelection()?.addRange(range);
-        document.execCommand("Copy");
-        document.getSelection()?.removeAllRanges();
+        void navigator.clipboard.writeText(value).catch(() => {/* clipboard unavailable */});
         setTimeout(() => {
             copyButtonActive = false;
         }, 500);
@@ -39,7 +34,7 @@
     // Autoscroll
     $effect.pre(() => {
         if (!value || !autoscroll) return;
-        shouldAutoscroll = !!(scroller && (scroller.offsetHeight + scroller.scrollTop) > (scroller.scrollHeight - 20));
+        const shouldAutoscroll = !!(scroller && (scroller.offsetHeight + scroller.scrollTop) > (scroller.scrollHeight - 20));
         if (!shouldAutoscroll) return;
         void tick().then(() => {
             scroller?.scrollTo(0, scroller?.scrollHeight);

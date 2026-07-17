@@ -110,11 +110,9 @@
     <div class="display-container" onscroll={handleScroll}>
         {#each options as option (option.bind)}
             <Multiselect
-                // @ts-ignore-error because I can't be bothered
+                // @ts-ignore-error app.action and option.bind are correlated at runtime; TS can't narrow the union index
                 bind:checked={app.options[app.action][option.bind]}
                 description={option.description}
-                // showTooltip={false}
-                // showDescription={false}
             >
                 {option.label}
             </Multiselect>

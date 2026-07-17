@@ -30,16 +30,6 @@ export function tooltip(node: HTMLElement, {
 
         let tooltipsLayer = document.getElementById("tooltips-layer");
 
-        // Create Component
-        // component = Tooltip({
-        //     target: node}, {
-        //         text,
-        //         color,
-        //         position,
-        //         x,
-        //         y
-        // });
-
         component = mount(Tooltip, {
             target: node,
             props: {
@@ -54,7 +44,6 @@ export function tooltip(node: HTMLElement, {
         // Need to await a tick in order for the component to be built and populated
         await tick();
 
-        // TODO: fix eslint?
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
         tooltipDOM = component.getElement();
 
@@ -106,42 +95,38 @@ export function tooltip(node: HTMLElement, {
     }
 
     function unmountTooltip() {
-
-        const tooltipsLayer = document.getElementById("tooltips-layer");
-
         // Check if component is already rendered to prevent warnings
         if (isComponentRendered) {
 
-            // Remove component
+            // Remove the tooltip's own DOM. The shared #tooltips-layer container
+            // is intentionally left in place for other/future tooltips.
             void unmount(component);
-            tooltipsLayer?.remove();
 
             // Tooltip is no longer rendered, update our check
             isComponentRendered = false;
         }
     }
 
-    // Add listeners for rendering/unrendering
-    node.addEventListener("mouseenter", () => void renderTooltip());
+    // Add listeners for rendering/unrendering. Keep a stable handler reference
+    // so it can actually be removed again in destroy().
+    const showTooltip = () => void renderTooltip();
+    node.addEventListener("mouseenter", showTooltip);
     node.addEventListener("mouseleave", unmountTooltip);
-    node.addEventListener("focus", () => void renderTooltip());
+    node.addEventListener("focus", showTooltip);
     node.addEventListener("blur", unmountTooltip);
     node.childNodes.forEach(child => {
-        child.addEventListener("focus", () => void renderTooltip());
-    });
-    node.childNodes.forEach(child => {
+        child.addEventListener("focus", showTooltip);
         child.addEventListener("blur", unmountTooltip);
     });
 
     return {
         destroy() {
-            node.removeEventListener("mouseenter", () => void renderTooltip());
+            node.removeEventListener("mouseenter", showTooltip);
             node.removeEventListener("mouseleave", unmountTooltip);
-            node.removeEventListener("focus", () => void renderTooltip());
+            node.removeEventListener("focus", showTooltip);
+            node.removeEventListener("blur", unmountTooltip);
             node.childNodes.forEach(child => {
-                child.removeEventListener("focus", () => void renderTooltip());
-            });
-            node.childNodes.forEach(child => {
+                child.removeEventListener("focus", showTooltip);
                 child.removeEventListener("blur", unmountTooltip);
             });
         }

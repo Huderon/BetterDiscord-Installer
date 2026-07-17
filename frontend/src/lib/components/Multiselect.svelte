@@ -25,7 +25,7 @@
 
 <label class="check-container" use:tooltip={{text: showTooltip ? description : ""}}>
     <input bind:this={checkbox} bind:checked type="checkbox" hidden {disabled} {onchange} />
-    <div onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} tabindex="0" class="check-item" class:disabled role="listbox">
+    <div onkeypress={(e: KeyboardEvent) => handleKeyboardToggle(e, checkbox)} tabindex={disabled ? -1 : 0} class="check-item" class:disabled role="checkbox" aria-checked={checked ?? false} aria-disabled={disabled}>
         <div class="icon">
             {@render icon?.()}
         </div>

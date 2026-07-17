@@ -10,10 +10,11 @@ export const handleKeyboardToggle = (event: KeyboardEvent, checkbox: HTMLInputEl
     }
 };
 
-let i = 0;
 export const handleArrowKeys = (event: KeyboardEvent, container: HTMLDivElement) => {
     container.focus();
-    if (container.hasAttribute("data-selected-index")) i = parseInt(container.getAttribute("data-selected-index")!);
+    // Read the current index from the DOM on each call so multiple radio groups
+    // don't share a single module-level cursor.
+    let i = container.hasAttribute("data-selected-index") ? parseInt(container.getAttribute("data-selected-index")!) : 0;
     if (event.key === "ArrowDown") {
         if (i < (container.children.length - 2)) i++;
         else i = 0;

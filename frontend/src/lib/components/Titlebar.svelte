@@ -7,8 +7,10 @@
 
     let version = $state("");
     try {
-            // eslint-disable-next-line new-cap
-    void GetVersion().then((v) => version = v);
+        // eslint-disable-next-line new-cap
+        void GetVersion()
+            .then((v) => version = v)
+            .catch(() => version = "development");
     }
     catch {
         // Probably not running in Wails, fallback to development version

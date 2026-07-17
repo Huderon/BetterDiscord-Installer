@@ -27,11 +27,13 @@ const app = $state<AppState>({
 try {
     for (const channel of channels) {
         // eslint-disable-next-line new-cap
-        void GetDiscordPath(channel).then(path => app.corePaths[channel] = path);
+        void GetDiscordPath(channel)
+            .then(path => app.corePaths[channel] = path)
+            .catch(() => {/* leave corePaths[channel] empty (e.g. not in Wails) */});
     }
 }
 catch {
-    // Not in wails environment
+    // GetDiscordPath binding is missing entirely (not in a Wails environment)
 }
 
 export default app;
