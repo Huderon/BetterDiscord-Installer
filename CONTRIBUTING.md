@@ -17,6 +17,8 @@ The following is a set of guidelines for contributing to BetterDiscord's Install
   * [Your First Code Contribution](#your-first-code-contribution)
   * [Pull Requests](#pull-requests)
 
+[AI-assisted contributions](#ai-assisted-contributions)
+
 [Styleguides](#styleguides)
   * [Git Commit Messages](#git-commit-messages)
   * [Frontend (Svelte + TypeScript) Styleguide](#frontend-svelte--typescript-styleguide)
@@ -118,6 +120,15 @@ Please follow these steps to have your contribution considered by the maintainer
 3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 
 While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
+
+## AI-assisted contributions
+
+AI tools are fine to use. Submitting output with little or no personal review is not.
+
+- **Review the diff yourself.** If you can't explain why each changed line is correct, the PR isn't ready.
+- **Run the required checks locally.** Don't rely on CI to catch problems you could catch before pushing.
+- **Disclose AI involvement in your PR description.** If an AI wrote a meaningful portion of the code, say so and briefly describe what you reviewed. This isn't meant as a penalty, it's useful context for the reviewer.
+- **If you used an autonomous agent with minimal personal review of the output, say that explicitly.** PRs that appear to be unreviewed agent output and don't disclose this will be closed without detailed feedback.
 
 ## Styleguides
 
