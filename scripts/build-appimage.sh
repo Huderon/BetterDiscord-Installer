@@ -41,3 +41,8 @@ fi
 # --appimage-extract-and-run avoids needing FUSE on CI runners.
 ARCH=x86_64 "$TOOL" --appimage-extract-and-run "$APPDIR" \
     "$OUT_DIR/BetterDiscord-Installer-Linux.AppImage"
+
+# Ship inside a zip so the executable bit survives the download; a raw
+# AppImage would need a manual chmod +x after downloading.
+rm -f "$OUT_DIR/BetterDiscord-Installer-Linux.AppImage.zip"
+(cd "$OUT_DIR" && zip -q9 BetterDiscord-Installer-Linux.AppImage.zip BetterDiscord-Installer-Linux.AppImage)

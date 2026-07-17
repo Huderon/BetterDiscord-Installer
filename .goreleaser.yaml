@@ -65,6 +65,9 @@ builds:
       # wails build injects these for darwin (see wails pkg/commands/build);
       # without UniformTypeIdentifiers the link fails on UTType symbols.
       # 12.0 matches LSMinimumSystemVersion (Go 1.26's own floor is macOS 12).
+      # The CFLAGS deployment target keeps compile-stage objects aligned with
+      # the link target (otherwise clang defaults to the host macOS version).
+      - CGO_CFLAGS=-mmacosx-version-min=12.0
       - CGO_LDFLAGS=-framework UniformTypeIdentifiers -mmacosx-version-min=12.0
     goos:
       - darwin
@@ -142,7 +145,7 @@ release:
   extra_files:
     # Built by scripts/build-appimage.sh on the linux leg; the wildcard glob
     # safely matches nothing on the other OS legs.
-    - glob: dist/appimage/*.AppImage
+    - glob: dist/appimage/*.AppImage.zip
   header: |
     ## BetterDiscord Installer {{ .Tag }}
   footer: |
