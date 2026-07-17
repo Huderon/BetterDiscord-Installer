@@ -4,10 +4,10 @@ import {describe, expect, it} from "vitest";
 
 
 describe("Spinner", () => {
-    it("renders a progressbar with aria attributes", () => {
+    it("renders an indeterminate progressbar", () => {
         const {getByRole} = render(Spinner);
 
         const spinner = getByRole("progressbar");
-        expect(spinner).toHaveAttribute("aria-valuenow");
+        expect(spinner).toHaveAttribute("aria-busy", "true");
     });
 });

@@ -37,7 +37,6 @@
                     <rect fill="#975500" width="6" height="1" x="3" y="5.5" fill-rule="evenodd" />
                 </svg>
             </button>
-            <!-- <button id="maximize" disabled></button> -->
         {:else}
             <button tabindex="-1" onclick={minimize} id="minimize" aria-label="minimize" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -172,9 +171,4 @@
     .type-mac .window-controls #minimize {
         background-color: #ffbb2e;
     }
-
-    /* .type-mac .window-controls button[disabled] {
-        background-color: var(--bg3-alt);
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.012);
-    } */
 </style>

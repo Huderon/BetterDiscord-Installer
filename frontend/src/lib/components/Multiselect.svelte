@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Button from "./Button.svelte";
-    import {handleKeyboardToggle} from "$lib/utils/handlers";
     import type {Snippet} from "svelte";
+    import {handleKeyboardToggle} from "$lib/utils/handlers";
+    import Button from "./Button.svelte";
     import {tooltip} from "./tooltip";
 
     interface Props {

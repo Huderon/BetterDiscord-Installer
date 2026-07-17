@@ -135,19 +135,6 @@
         padding-bottom: 10px;
     }
 
-    /* .display-container.grid { */
-        /* display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, auto);
-        gap: 5px;
-        align-content: center;
-        height: 100%; */
-    /* } */
-
-    /* .display-container.grid > :global(.check-container) { */
-        /* margin-bottom: 0; */
-    /* } */
-
     .display-container::-webkit-scrollbar {
         width: 8px;
     }

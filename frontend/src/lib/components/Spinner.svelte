@@ -1,33 +1,18 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-
-    let circle: SVGCircleElement;
-    let value = $state(0);
-
-    function updateValue() {
-        const circumference = Math.PI * (parseInt(circle.getAttribute("r")!) * 2);
-        if (value < 0) value = 0;
-        if (value > 100) value = 100;
-        circle.style.strokeDashoffset = `${((100 - value) / 100) * circumference}`;
-    }
-
-    onMount(updateValue);
-    $effect(updateValue);
+    // Purely presentational, indeterminate spinner — no props or state.
 </script>
 
 <svg
     class="spinner"
-    class:indeterminate={!value}
     width="32"
     height="32"
     viewBox="0 0 16 16"
     role="progressbar"
-    aria-valuemin={value ? 0 : undefined}
-    aria-valuemax={value ? 100 : undefined}
-    aria-valuenow={value}
+    aria-label="Loading"
+    aria-busy="true"
 >
     <circle class="spinner-ring" cx="50%" cy="50%" r="7" />
-    <circle class="spinner-fill" cx="50%" cy="50%" r="7" stroke-dasharray="3" bind:this={circle} />
+    <circle class="spinner-fill" cx="50%" cy="50%" r="7" stroke-dasharray="3" />
 </svg>
 
 <style>
@@ -67,10 +52,6 @@
     .spinner .spinner-fill {
         stroke: var(--accent);
         stroke-dasharray: 43.75;
-        animation: spinner 2s linear infinite;
-    }
-
-    .spinner.indeterminate .spinner-fill {
         animation: spinner-indeterminate 2s linear infinite;
     }
 </style>

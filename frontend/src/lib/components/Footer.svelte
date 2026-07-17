@@ -70,7 +70,7 @@
 
 </script>
 
-<svelte:window on:keydown={navigatePage} />
+<svelte:window onkeydown={navigatePage} />
 
 <footer class="install-footer">
     <SocialLinks />

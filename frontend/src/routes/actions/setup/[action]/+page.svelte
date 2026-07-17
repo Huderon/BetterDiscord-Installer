@@ -1,19 +1,18 @@
 <script lang="ts">
-    import Multiselect from "$lib/components/Multiselect.svelte";
-    import app from "$lib/stores/state.svelte";
     import {BrowseForDiscord as findDiscordDialog} from "@api";
-
+    import app from "$lib/stores/state.svelte";
+    import {labels, type DiscordChannel} from "$lib/types";
+    import Page from "$lib/components/Page.svelte";
+    import Multiselect from "$lib/components/Multiselect.svelte";
     import stableUrl from "@assets/images/stable.png";
     import canaryUrl from "@assets/images/canary.png";
     import ptbUrl from "@assets/images/ptb.png";
-    import {labels, type DiscordChannel} from "$lib/types";
-    import Page from "$lib/components/Page.svelte";
 
 
     const imageUrls: Record<DiscordChannel, string> = {stable: stableUrl, canary: canaryUrl, ptb: ptbUrl};
 
     const nextLabel = $derived(app.action[0].toUpperCase() + app.action.slice(1));
-    async function click(platform: DiscordChannel) {
+    async function browseForChannel(platform: DiscordChannel) {
         const resourcesPath = await findDiscordDialog(platform);
         app.corePaths[platform] = resourcesPath;
         app.channels[platform] = Boolean(resourcesPath);
@@ -30,7 +29,7 @@
 
     {#each Object.entries(labels) as [channel, label] (channel)}
         <Multiselect
-            onclick={() => click(channel as DiscordChannel)}
+            onclick={() => browseForChannel(channel as DiscordChannel)}
             description={app.corePaths[channel as DiscordChannel] || "Not Found"}
             bind:checked={app.channels[channel as DiscordChannel]}
             disabled={!app.corePaths[channel as DiscordChannel]}

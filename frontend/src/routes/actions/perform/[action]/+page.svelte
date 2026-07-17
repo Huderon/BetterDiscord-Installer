@@ -55,8 +55,8 @@
     const currentAction = app.action;
 
     const installPaths: Partial<Record<DiscordChannel, string>> = {};
-    for (const c in app.corePaths) {
-        const channel = c as DiscordChannel;
+    for (const channelKey in app.corePaths) {
+        const channel = channelKey as DiscordChannel;
         if (!app.channels[channel]) continue;
         installPaths[channel] = app.corePaths[channel];
     }

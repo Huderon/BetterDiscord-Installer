@@ -26,9 +26,7 @@
     <Titlebar macButtons={isMac} />
     <main class="installer-body">
         <div class="sections">
-             <!-- {#key window.location.pathname} -->
-             {@render children()}
-             <!-- {/key} -->
+            {@render children()}
         </div>
         <Footer />
     </main>
@@ -39,11 +37,9 @@
     .main-window {
         display: flex;
         flex-direction: column;
-        /* border-radius: 3px; */
         overflow: hidden;
         contain: strict;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-        /* margin: 11.5px 7.5px; */
         width: 100%;
         height: 100%;
         word-break: break-word;
