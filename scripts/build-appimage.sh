@@ -29,11 +29,17 @@ Categories=Utility;
 Terminal=false
 EOF
 
-TOOL="$OUT_DIR/appimagetool"
+# Pinned appimagetool release, verified against its published sha256 digest
+# for reproducibility and supply-chain safety.
+TOOL_VERSION=1.9.1
+TOOL_SHA256=ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0
+
+TOOL="$OUT_DIR/appimagetool-$TOOL_VERSION"
 if [ ! -x "$TOOL" ]; then
     # Download to a temp file first so an interrupted download can't leave a
     # partial file behind that a later run would try to execute.
-    curl -fsSL -o "$TOOL.tmp" "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+    curl -fsSL -o "$TOOL.tmp" "https://github.com/AppImage/appimagetool/releases/download/$TOOL_VERSION/appimagetool-x86_64.AppImage"
+    echo "$TOOL_SHA256  $TOOL.tmp" | sha256sum -c - > /dev/null
     chmod +x "$TOOL.tmp"
     mv "$TOOL.tmp" "$TOOL"
 fi

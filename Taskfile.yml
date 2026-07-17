@@ -22,8 +22,12 @@ tasks:
   # Frontend tasks
   frontend:
     desc: Install frontend dependencies and build the frontend
+    # Same commands as scripts/build-frontend.sh (kept for the GoReleaser
+    # hook), inlined here so the task works without a POSIX sh.
+    dir: frontend
     cmds:
-      - sh ./scripts/build-frontend.sh
+      - bun install --frozen-lockfile
+      - bun run build
 
   frontend:check:
     desc: Typecheck and lint the frontend

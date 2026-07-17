@@ -98,6 +98,11 @@ func run(ver, out string) error {
 	if err != nil {
 		return err
 	}
-	defer fout.Close()
-	return rs.WriteObject(fout, winres.ArchAMD64)
+	if err := rs.WriteObject(fout, winres.ArchAMD64); err != nil {
+		fout.Close()
+		return err
+	}
+	// Close explicitly so flush errors fail the build instead of being
+	// swallowed by a deferred Close, which could leave a corrupt syso.
+	return fout.Close()
 }
