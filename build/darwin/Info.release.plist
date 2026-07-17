@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Rendered by scripts/render-plist.sh into dist/darwin/Info.plist for the
+     .app bundle assembled by GoReleaser. Static equivalent of Info.plist,
+     which is a Go template only `wails build` can render. -->
+<plist version="1.0">
+    <dict>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleName</key>
+        <string>BetterDiscord Installer</string>
+        <key>CFBundleExecutable</key>
+        <string>BetterDiscord-Installer</string>
+        <key>CFBundleIdentifier</key>
+        <string>app.betterdiscord.installer</string>
+        <key>CFBundleVersion</key>
+        <string>__VERSION__</string>
+        <key>CFBundleShortVersionString</key>
+        <string>__VERSION__</string>
+        <key>CFBundleIconFile</key>
+        <string>iconfile</string>
+        <key>LSMinimumSystemVersion</key>
+        <string>12.0.0</string>
+        <key>NSHighResolutionCapable</key>
+        <string>true</string>
+        <key>NSHumanReadableCopyright</key>
+        <string>© BetterDiscord</string>
+    </dict>
+</plist>

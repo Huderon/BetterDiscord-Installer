@@ -82,10 +82,15 @@ func (action *Controller) Repair(corePaths []string, options types.RepairOptions
 	}
 
 	result, err := runtime.MessageDialog(action.ctx, runtime.MessageDialogOptions{
-		Type:          runtime.QuestionDialog,
-		Title:         "Repair Complete",
-		Message:       "Repair is complete. Would you like to reinstall BetterDiscord now?",
+		Type:    runtime.QuestionDialog,
+		Title:   "Repair Complete",
+		Message: "Repair is complete. Would you like to reinstall BetterDiscord now?",
+		// Explicit buttons are required on macOS: its dialog maps the result
+		// back through Buttons, returning "" when none are set. The other
+		// platforms ignore Buttons and return Yes/No on their own.
+		Buttons:       []string{"Yes", "No"},
 		DefaultButton: "Yes",
+		CancelButton:  "No",
 	})
 
 	if err != nil {
@@ -136,10 +141,13 @@ func (d *Controller) BrowseForDiscord(schannel string) string {
 
 func (d *Controller) ConfirmAction(title string, message string) string {
 	result, err := runtime.MessageDialog(d.ctx, runtime.MessageDialogOptions{
-		Type:          runtime.QuestionDialog,
-		Title:         title,
-		Message:       message,
+		Type:    runtime.QuestionDialog,
+		Title:   title,
+		Message: message,
+		// See the note on explicit Buttons in RepairAction above.
+		Buttons:       []string{"Yes", "No"},
 		DefaultButton: "No",
+		CancelButton:  "No",
 	})
 
 	if err != nil {

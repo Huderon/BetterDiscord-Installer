@@ -1,0 +1,222 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# GoReleaser v2 configuration for BetterDiscord Installer (Wails)
+version: 2
+
+project_name: BetterDiscord-Installer
+
+# Wails relies on CGO and native toolchains, so releases should run on native OS runners.
+# This config intentionally keeps packaging simple and stable-channel focused.
+before:
+  hooks:
+    - go mod download
+    - sh ./scripts/build-frontend.sh
+
+builds:
+  - id: installer-linux
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "linux" }}'
+    main: .
+    binary: BetterDiscord-Installer
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+    tags:
+      - desktop
+      - production
+      - webkit2_41
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Tag }}
+    hooks:
+      # Also package the binary as an AppImage; uploaded via release.extra_files.
+      post: sh ./scripts/build-appimage.sh {{ .Path }}
+
+  - id: installer-windows
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "windows" }}'
+    main: .
+    binary: BetterDiscord-Installer
+    # Wails on Windows uses go-webview2 (pure Go), so no CGO needed.
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+    tags:
+      - desktop
+      - production
+    ldflags:
+      - -s -w
+      - -H=windowsgui
+      - -X main.version={{ .Tag }}
+    hooks:
+      # go build doesn't compile the icon/manifest/version resources that
+      # `wails build` would; generate the .syso ourselves so it gets linked.
+      pre: go run ./scripts/winres -version {{ .Version }}
+
+  - id: installer-darwin
+    skip: '{{ ne (envOrDefault "RELEASE_OS" .Runtime.Goos) "darwin" }}'
+    main: .
+    binary: BetterDiscord-Installer
+    env:
+      - CGO_ENABLED=1
+      # wails build injects these for darwin (see wails pkg/commands/build);
+      # without UniformTypeIdentifiers the link fails on UTType symbols.
+      # 12.0 matches LSMinimumSystemVersion (Go 1.26's own floor is macOS 12).
+      # The CFLAGS deployment target keeps compile-stage objects aligned with
+      # the link target (otherwise clang defaults to the host macOS version).
+      - CGO_CFLAGS=-mmacosx-version-min=12.0
+      - CGO_LDFLAGS=-framework UniformTypeIdentifiers -mmacosx-version-min=12.0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    tags:
+      - desktop
+      - production
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Tag }}
+
+# Merge the two macOS arch builds into a single universal binary so one
+# download (and one homebrew cask URL) serves both Intel and Apple Silicon.
+# The slashed name places the binary at its .app bundle location, so the
+# darwin archive below only needs to add Info.plist and the icon to form a
+# complete "BetterDiscord Installer.app".
+universal_binaries:
+  - id: installer-darwin-universal
+    ids:
+      - installer-darwin
+    name_template: BetterDiscord Installer.app/Contents/MacOS/BetterDiscord-Installer
+    replace: true
+    hooks:
+      # Render Info.plist with the release version for the .app archive below.
+      # Runs here (not in before.hooks) because dist/ must not exist yet when
+      # GoReleaser starts, and this pipe only runs on the darwin leg anyway.
+      post: sh ./scripts/render-plist.sh {{ .Version }}
+
+# Artifact names intentionally exclude the version (so that stable
+# releases/latest/download/... deep links in the README and on
+# betterdiscord.app keep working across releases; the tag in the URL path
+# identifies the version) and the architecture (one artifact per OS, and
+# plain OS names are friendlier for non-technical downloaders).
+archives:
+  # Keep Linux in a zip archive to preserve executable metadata and provide a clean download.
+  - id: linux-zip
+    ids:
+      - installer-linux
+    formats:
+      - zip
+    name_template: "{{ .ProjectName }}-Linux"
+    files:
+      - src: README.md
+      - src: LICENSE
+
+  # macOS ships as a proper .app bundle inside the zip.
+  - id: darwin-app
+    ids:
+      - installer-darwin-universal
+    formats:
+      - zip
+    name_template: "{{ .ProjectName }}-Mac"
+    files:
+      - src: dist/darwin/Info.plist
+        dst: BetterDiscord Installer.app/Contents/Info.plist
+      - src: build/darwin/icon.icns
+        dst: BetterDiscord Installer.app/Contents/Resources/iconfile.icns
+
+  # Keep Windows as a raw .exe as requested.
+  - id: windows-raw
+    ids:
+      - installer-windows
+    formats:
+      - binary
+    name_template: "{{ .ProjectName }}-Windows"
+
+checksum:
+  name_template: checksums_{{ envOrDefault "RELEASE_OS" .Runtime.Goos }}.txt
+
+release:
+  prerelease: auto
+  mode: keep-existing
+  extra_files:
+    # Built by scripts/build-appimage.sh on the linux leg; the wildcard glob
+    # safely matches nothing on the other OS legs.
+    - glob: dist/appimage/*.AppImage.zip
+  header: |
+    ## BetterDiscord Installer {{ .Tag }}
+  footer: |
+    **Full Changelog**: https://github.com/BetterDiscord/Installer/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+git:
+  ignore_tags:
+    - nightly
+
+homebrew_casks:
+  - name: betterdiscord-installer
+    description: "A simple standalone program to install, repair, and uninstall BetterDiscord."
+    homepage: "https://betterdiscord.app/"
+    license: "MIT"
+    # The archive contains a .app bundle; OSS GoReleaser only knows the
+    # `binary` stanza, so the app stanza is added via custom_block and the
+    # binary stanza doubles as a CLI shim pointing inside the installed app.
+    custom_block: |
+      app "BetterDiscord Installer.app"
+    binaries: ['#{appdir}/BetterDiscord Installer.app/Contents/MacOS/BetterDiscord-Installer']
+    # Don't publish prereleases (e.g. v2.0.0-alpha.1) to the tap.
+    skip_upload: auto
+    commit_author:
+      name: zerebos
+      email: 6865942+zerebos@users.noreply.github.com
+    repository:
+      owner: BetterDiscord
+      name: homebrew-tap
+      branch: main
+      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+
+winget:
+  - name: BetterDiscord Installer
+    package_identifier: BetterDiscord.Installer
+    author: BetterDiscord
+    release_notes: "{{ .Changelog }}"
+    release_notes_url: https://github.com/BetterDiscord/Installer/releases/tag/{{ .Tag }}
+    publisher: "BetterDiscord"
+    publisher_url: "https://github.com/BetterDiscord"
+    publisher_support_url: "https://github.com/BetterDiscord/Installer/issues"
+    license: "MIT"
+    license_url: "https://github.com/BetterDiscord/Installer/blob/main/LICENSE"
+    short_description: "A standalone GUI installer for BetterDiscord."
+    homepage: "https://betterdiscord.app/"
+    tags: [gui, installer, discord, betterdiscord]
+    url_template: "https://github.com/BetterDiscord/Installer/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # Don't open winget-pkgs PRs for prereleases (e.g. v2.0.0-alpha.1).
+    skip_upload: auto
+    commit_author:
+      name: zerebos
+      email: 6865942+zerebos@users.noreply.github.com
+    repository:
+      owner: betterdiscord
+      name: winget-pkgs
+      branch: installer-{{ .Tag }}-{{ .Now.Format "20060102150405" }}
+      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+      pull_request:
+        enabled: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+        draft: false

@@ -38,9 +38,9 @@ This repository contains the source code for the BetterDiscord installer. The ap
 
 | Platform | Minimum Version | Support Status | Notes |
 | --- | --- | --- | --- |
-| Windows | Windows 10+ | ✅ | x64, ARM64, and x86 builds are available. |
-| macOS | macOS 11+ (Big Sur) | ✅ | x64 and ARM64 builds are available. |
-| Linux | Ubuntu 20.04+ and Debian 11+, openSUSE 16.2+, Fedora Linux 32+ | ✅ | See Linux install support notes below. |
+| Windows | Windows 10+ | ✅ | x64. Uses the system WebView2 runtime. |
+| macOS | macOS 12+ (Monterey) | ✅ | Universal binary (Intel + Apple Silicon). |
+| Linux | Any x64 distro with WebKitGTK 4.1 (e.g. Ubuntu 22.04+, Debian 12+, Fedora 37+) | ✅ | See Linux install support notes below. |
 
 Linux install support:
 
@@ -52,10 +52,36 @@ Linux install support:
 
 These links point to the latest builds in the [releases](https://github.com/BetterDiscord/installer/releases/) tab of this repository.
 
-| [Windows (11+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Windows.exe)  | [macOS (14+)](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Mac.zip) | [Linux](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Linux) |
-| ------------- | ------------- | ------------- |
+| Platform | Download |
+| --- | --- |
+| Windows | [BetterDiscord-Installer-Windows.exe](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Windows.exe) |
+| macOS | [BetterDiscord-Installer-Mac.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Mac.zip) |
+| Linux (AppImage) | [BetterDiscord-Installer-Linux.AppImage.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Linux.AppImage.zip) |
+| Linux (zip) | [BetterDiscord-Installer-Linux.zip](https://github.com/BetterDiscord/Installer/releases/latest/download/BetterDiscord-Installer-Linux.zip) |
+
+Or install via a package manager:
+
+```sh
+# Windows
+winget install BetterDiscord.Installer
+
+# macOS
+brew install --cask betterdiscord/tap/betterdiscord-installer
+```
 
 ## FAQ
+
+### Windows says "Windows protected your PC" when I run the installer
+
+The installer is currently not code-signed, so SmartScreen warns on new downloads. Click **More info** → **Run anyway**. Installing via `winget` avoids the prompt since winget verifies the download hash.
+
+### macOS says the app "cannot be opened because it is from an unidentified developer"
+
+The app is not yet notarized with Apple. Right-click the app and choose **Open** (on newer macOS versions you may need to allow it under **System Settings → Privacy & Security → Open Anyway**). Alternatively, remove the quarantine flag:
+
+```sh
+xattr -d com.apple.quarantine "/Applications/BetterDiscord Installer.app"
+```
 
 ### Does the installer support Flatpak Discord on Linux?
 
@@ -91,12 +117,18 @@ Replace `com.discordapp.Discord` with your Discord Flatpak app ID if it differs 
 ```text
 .
 ├── api                     // Wails bindings and backend runtime helpers.
+├── betterdiscord           // BetterDiscord install/repair/uninstall logic.
 ├── build                   // Build assets and platform-specific packaging files.
+├── discord                 // Discord installation discovery.
 ├── frontend                // Svelte UI bundled by Vite (Bun-powered).
+├── scripts                 // Build/release helper scripts (frontend, AppImage, winres).
 ├── types                   // Shared Go types used by bindings.
 ├── utils                   // Backend utilities.
+├── wsl                     // WSL detection and path helpers.
 ├── main.go                 // Wails application entry point.
 ├── wails.json              // Wails configuration + frontend hooks.
+├── Taskfile.yml            // Common dev/build tasks (https://taskfile.dev).
+├── .goreleaser.yaml        // Release build + publishing configuration.
 ```
 
 </details>
@@ -106,6 +138,8 @@ Replace `com.discordapp.Discord` with your Discord Flatpak app ID if it differs 
 - [Go](https://go.dev/) (matches `go.mod`)
 - [Bun](https://bun.sh/)
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+- [Task](https://taskfile.dev/) (optional, for the shortcuts below)
+- [GoReleaser](https://goreleaser.com/install/) (optional, for local release snapshots)
 - Command line of your choice
 
 ### Linux Prerequisites
@@ -127,35 +161,28 @@ export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/share/pkgconfig"
 git clone https://github.com/BetterDiscord/installer && cd installer
 
 # Run in development mode with backend bindings
-wails dev
+task dev        # or: wails dev (add -tags webkit2_41 on Linux)
 
 # Build a distributable binary
-wails build
+task build      # or: wails build (add -tags webkit2_41 on Linux)
 ```
 
-#### Frontend Checks
+#### Checks and Tests
 
 ```bash
-cd frontend
-bun install
-bun run --bun svelte-kit sync
-bun run --bun svelte-check --tsconfig ./tsconfig.json
-bun run --bun eslint .
-```
+task check      # frontend typecheck + lint, go vet, go test
 
-#### Frontend Tests
-
-```bash
-cd frontend
-bun install
-bun run test
-```
-
-#### Backend Checks
-
-```bash
+# Or run pieces individually:
+cd frontend && bun install && bun run check && bun run lint && bun run test
 go test ./...
-gofmt -w .
+```
+
+#### Release Snapshots
+
+Releases are built and published by [GoReleaser](https://goreleaser.com/) when a `v*` tag is pushed (prerelease tags like `v2.0.0-alpha.1` skip the winget/homebrew publishing). To build a local snapshot of the release artifacts for your platform:
+
+```bash
+task snapshot   # output lands in dist/
 ```
 
 ## Contributing
