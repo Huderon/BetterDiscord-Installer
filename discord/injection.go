@@ -14,7 +14,9 @@ var injectionScript string
 
 func (discord *DiscordInstall) inject(bd *betterdiscord.BDInstall) error {
 
-	if err := os.WriteFile(filepath.Join(discord.CorePath, "index.js"), []byte(injectionScript), 0755); err != nil {
+	// 0o644: index.js is a require target, it doesn't need the executable bit
+	// (matches the mode uninject writes).
+	if err := os.WriteFile(filepath.Join(discord.CorePath, "index.js"), []byte(injectionScript), 0o644); err != nil {
 		log.Printf("❌ Unable to write index.js in %s\n", discord.CorePath)
 		log.Printf("   %s\n", err.Error())
 		return err

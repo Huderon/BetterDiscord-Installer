@@ -7,13 +7,20 @@ import (
 	"log"
 )
 
+// Endpoints for fetching the BetterDiscord asar. Declared as package vars so
+// tests can point them at a local httptest server.
+var (
+	websiteAsarURL         = "https://betterdiscord.app/Download/betterdiscord.asar"
+	githubLatestReleaseURL = "https://api.github.com/repos/BetterDiscord/BetterDiscord/releases/latest"
+)
+
 func (i *BDInstall) download() error {
 	if i.hasDownloaded {
 		log.Printf("✅ Already downloaded to %s\n", i.asar)
 		return nil
 	}
 
-	resp, err := utils.DownloadFile("https://betterdiscord.app/Download/betterdiscord.asar", i.asar)
+	resp, err := utils.DownloadFile(websiteAsarURL, i.asar)
 	if err == nil {
 		version := resp.Header.Get("x-bd-version")
 		if version == "" {
@@ -31,7 +38,7 @@ func (i *BDInstall) download() error {
 	}
 
 	// Get download URL from GitHub API
-	apiData, err := utils.DownloadJSON[types.GitHubRelease]("https://api.github.com/repos/BetterDiscord/BetterDiscord/releases/latest")
+	apiData, err := utils.DownloadJSON[types.GitHubRelease](githubLatestReleaseURL)
 	if err != nil {
 		log.Println("❌ Failed to get asset url from GitHub")
 		log.Printf("❌ %s\n", err.Error())
