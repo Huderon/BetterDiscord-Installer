@@ -48,10 +48,15 @@ func (a *App) CheckForUpdate() {
 	}
 
 	result, err := runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{
-		Type:          runtime.QuestionDialog,
-		Title:         "Update Available",
-		Message:       fmt.Sprintf("A new version (%s) of the installer is available. Would you like to download it now?", apiData.TagName),
+		Type:    runtime.QuestionDialog,
+		Title:   "Update Available",
+		Message: fmt.Sprintf("A new version (%s) of the installer is available. Would you like to download it now?", apiData.TagName),
+		// Explicit buttons are required on macOS: its dialog maps the result
+		// back through Buttons, returning "" when none are set. The other
+		// platforms ignore Buttons and return Yes/No on their own.
+		Buttons:       []string{"Yes", "No"},
 		DefaultButton: "Yes",
+		CancelButton:  "No",
 	})
 
 	if err != nil {
