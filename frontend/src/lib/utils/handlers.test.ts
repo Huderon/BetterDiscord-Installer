@@ -32,6 +32,20 @@ describe("handlers", () => {
         expect(changeHandler).toHaveBeenCalledTimes(1);
     });
 
+    it("checkItem dispatches a bubbling change so delegated onchange handlers fire", () => {
+        // Svelte delegates `change` to the root; the event must bubble to reach
+        // onchange handlers (e.g. RadioGroup's selection indicator).
+        const parent = document.createElement("div");
+        const checkbox = createCheckbox(false);
+        parent.appendChild(checkbox);
+
+        const delegatedHandler = vi.fn();
+        parent.addEventListener("change", delegatedHandler);
+        checkItem(checkbox);
+
+        expect(delegatedHandler).toHaveBeenCalledTimes(1);
+    });
+
     it("handleKeyboardToggle toggles on Enter", () => {
         const checkbox = createCheckbox(false);
         const event = new KeyboardEvent("keydown", {key: "Enter"});

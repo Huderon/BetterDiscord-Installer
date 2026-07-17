@@ -1,6 +1,10 @@
 export function checkItem(item: HTMLInputElement) {
     item.checked = !item.checked;
-    const changeEvent = new Event("change");
+    // Bubble the event: Svelte delegates `change` to the root, so `onchange`
+    // handlers (e.g. RadioGroup's selection indicator via `update`) only fire on
+    // a bubbling event. A non-bubbling event reaches the direct bind:group /
+    // bind:checked listener but leaves delegated onchange handlers stale.
+    const changeEvent = new Event("change", {bubbles: true});
     item.dispatchEvent(changeEvent);
 }
 
