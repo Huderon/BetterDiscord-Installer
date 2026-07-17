@@ -32,7 +32,9 @@ func validateWindowsStyleInstall(proposed string) *DiscordInstall {
 		if len(candidates) == 0 {
 			return nil
 		}
-		sort.Slice(candidates, func(i, j int) bool { return candidates[i].Name() < candidates[j].Name() })
+		sort.Slice(candidates, func(i, j int) bool {
+			return utils.CompareVersions(candidates[i].Name(), candidates[j].Name()) < 0
+		})
 		versionDir := candidates[len(candidates)-1].Name()
 
 		// Get core wrap like discord_desktop_core-1
@@ -133,7 +135,9 @@ func validateUnixStyleInstall(proposed string, detectFlatpak bool, detectSnap bo
 		if len(candidates) == 0 {
 			return nil
 		}
-		sort.Slice(candidates, func(i, j int) bool { return candidates[i].Name() < candidates[j].Name() })
+		sort.Slice(candidates, func(i, j int) bool {
+			return utils.CompareVersions(candidates[i].Name(), candidates[j].Name()) < 0
+		})
 		versionDir := candidates[len(candidates)-1].Name()
 
 		// Get core wrap like discord_desktop_core-1

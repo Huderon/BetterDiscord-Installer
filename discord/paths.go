@@ -2,6 +2,7 @@ package discord
 
 import (
 	"installer/types"
+	"installer/utils"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -87,13 +88,9 @@ func ResolvePath(proposed string) *DiscordInstall {
 func sortInstalls() {
 	for channel := range allDiscordInstalls {
 		slices.SortFunc(allDiscordInstalls[channel], func(a, b *DiscordInstall) int {
-			switch {
-			case a.Version > b.Version:
-				return -1
-			case b.Version > a.Version:
-				return 1
-			}
-			return 0
+			// Descending (highest version first) with a numeric compare so
+			// e.g. 1.0.10000 sorts above 1.0.9999.
+			return utils.CompareVersions(b.Version, a.Version)
 		})
 	}
 }
