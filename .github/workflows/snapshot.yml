@@ -1,31 +1,25 @@
-name: Release
+name: Release Snapshot
 
+# Manually-triggered cross-OS snapshot build. The per-PR "Release Snapshot" job
+# in ci.yml only builds the Linux leg (RELEASE_OS defaults to linux), so the
+# Windows .exe naming/resources and the macOS universal .app bundle + Info.plist
+# are otherwise unverified until a real tag. Run this before tagging a release.
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
-  group: release-${{ github.ref_name }}
-  cancel-in-progress: false
+  group: snapshot-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  release:
-    name: Release (${{ matrix.os }})
+  snapshot:
+    name: Snapshot (${{ matrix.release_os }})
     runs-on: ${{ matrix.os }}
-    # No-clobber release scheme — these three must stay in sync:
-    #   1. max-parallel: 1      → the first leg CREATES the GitHub release; the
-    #      others add artifacts to it (running in parallel would race creation).
-    #   2. mode: keep-existing  (.goreleaser.yaml) → later legs don't wipe it.
-    #   3. per-OS artifact/checksum names → legs never overwrite each other.
-    # Dropping any one of these risks a clobbered or partial release.
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         include:
           - os: ubuntu-latest
@@ -40,8 +34,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install Linux dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -57,13 +49,21 @@ jobs:
         with:
           bun-version: '1.3.14'
 
-      - name: Run GoReleaser
+      - name: Build snapshot
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean --skip=${{ matrix.skip_flags }}
+          args: release --snapshot --clean --skip=${{ matrix.skip_flags }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_PAT: ${{ secrets.GH_PAT }}
           RELEASE_OS: ${{ matrix.release_os }}
+
+      - name: Upload snapshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-${{ matrix.release_os }}
+          path: |
+            dist/BetterDiscord-Installer-*
+            dist/appimage/BetterDiscord-Installer-Linux.AppImage.zip
+          if-no-files-found: ignore
+          retention-days: 7

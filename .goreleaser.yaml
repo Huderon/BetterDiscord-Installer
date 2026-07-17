@@ -143,9 +143,10 @@ release:
   prerelease: auto
   mode: keep-existing
   extra_files:
-    # Built by scripts/build-appimage.sh on the linux leg; the wildcard glob
-    # safely matches nothing on the other OS legs.
+    # Built by scripts/build-appimage.sh on the linux leg; the wildcard globs
+    # safely match nothing on the other OS legs.
     - glob: dist/appimage/*.AppImage.zip
+    - glob: dist/appimage/*.AppImage.zip.sha256
   header: |
     ## BetterDiscord Installer {{ .Tag }}
   footer: |

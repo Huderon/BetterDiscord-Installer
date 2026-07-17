@@ -52,3 +52,7 @@ ARCH=x86_64 "$TOOL" --appimage-extract-and-run "$APPDIR" \
 # AppImage would need a manual chmod +x after downloading.
 rm -f "$OUT_DIR/BetterDiscord-Installer-Linux.AppImage.zip"
 (cd "$OUT_DIR" && zip -q9 BetterDiscord-Installer-Linux.AppImage.zip BetterDiscord-Installer-Linux.AppImage)
+
+# Emit a checksum sidecar. The AppImage.zip ships via release.extra_files, outside
+# GoReleaser's own checksums manifest, so this lets downloaders verify it too.
+(cd "$OUT_DIR" && sha256sum BetterDiscord-Installer-Linux.AppImage.zip > BetterDiscord-Installer-Linux.AppImage.zip.sha256)
