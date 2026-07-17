@@ -7,8 +7,5 @@ app/
 build/bin
 snippets/
 .task/
-*.md
-!README.md
-!CONTRIBUTING.md
 *.log
 *.syso

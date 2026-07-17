@@ -67,8 +67,8 @@ Common commands:
 
 * `wails dev` - run the app locally with backend bindings.
 * `wails build` - build distributable binaries.
-* `bun run --bun eslint .` (from `frontend/`) - lint frontend changes.
-* `bun run --bun svelte-check --tsconfig ./tsconfig.json` (from `frontend/`) - static checks.
+* `bun run lint` (from `frontend/`) - lint frontend changes.
+* `bun run check` (from `frontend/`) - typecheck and static checks.
 * `go test ./...` - run backend tests.
 * `gofmt -w .` - format Go files you touch.
 
@@ -85,7 +85,7 @@ Please search for existing issues first. If you find a match, add any extra cont
 
 #### Before Submitting A Bug Report
 
-* Reproduce on the latest `development` branch or a recent release.
+* Reproduce on the latest `main` branch or a recent release.
 * Collect logs from the installer UI (copy any error output shown).
 * Note your OS and architecture (Windows/macOS/Linux, x64/arm64).
 
