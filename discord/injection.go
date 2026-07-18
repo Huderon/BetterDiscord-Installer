@@ -2,61 +2,144 @@ package discord
 
 import (
 	_ "embed"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"installer/betterdiscord"
+	"installer/utils"
 )
 
-//go:embed assets/injection.js
-var injectionScript string
+//go:embed assets/app_index.js
+var appIndexScript string
 
+//go:embed assets/app_package.json
+var appPackageJSON string
+
+// probeWritable verifies dir accepts writes before we perform any destructive
+// operation, by creating and removing a throwaway file. This is the elevation
+// trigger: a failure here means we abort before touching the bundle.
+func probeWritable(dir string) error {
+	probe := filepath.Join(dir, ".bd-write-probe")
+	if err := os.WriteFile(probe, []byte{}, 0o644); err != nil {
+		return err
+	}
+	return os.Remove(probe)
+}
+
+// inject shadows Discord's app.asar: it preserves the original as
+// betterdiscord.app.asar and drops an `app/` entry directory that loads
+// BetterDiscord and then the preserved app. The operation is transactional —
+// any failure after the rename rolls back to the original state.
+//
+// bd is accepted for call-site symmetry with the install flow but unused: the
+// injection script resolves the BetterDiscord folder at runtime.
 func (discord *DiscordInstall) inject(bd *betterdiscord.BDInstall) error {
+	resources := discord.ResourcesPath
+	originalAsar := filepath.Join(resources, "app.asar")
+	preservedAsar := filepath.Join(resources, "betterdiscord.app.asar")
+	appDir := filepath.Join(resources, "app")
 
-	// 0o644: index.js is a require target, it doesn't need the executable bit
-	// (matches the mode uninject writes).
-	if err := os.WriteFile(filepath.Join(discord.CorePath, "index.js"), []byte(injectionScript), 0o644); err != nil {
-		log.Printf("❌ Unable to write index.js in %s\n", discord.CorePath)
+	// Probe writability before the destructive rename so we never leave a
+	// half-modified bundle on a read-only/permission-denied target.
+	if err := probeWritable(resources); err != nil {
+		log.Printf("❌ Cannot write to %s\n", resources)
 		log.Printf("   %s\n", err.Error())
 		return err
 	}
 
-	log.Printf("✅ Injected into %s\n", discord.CorePath)
-	return nil
-}
+	// Preserve the original app.asar (idempotent, guarded).
+	renamed := false
+	switch {
+	case utils.Exists(preservedAsar):
+		// Already preserved from a prior injection; leave the archive alone.
+	case utils.Exists(originalAsar):
+		if err := os.Rename(originalAsar, preservedAsar); err != nil {
+			log.Printf("❌ Unable to preserve app.asar in %s\n", resources)
+			log.Printf("   %s\n", err.Error())
+			return err
+		}
+		renamed = true
+	default:
+		return fmt.Errorf("no app.asar found in %s", resources)
+	}
 
-func (discord *DiscordInstall) uninject() error {
-	indexFile := filepath.Join(discord.CorePath, "index.js")
-
-	contents, err := os.ReadFile(indexFile)
-
-	// First try to check the file, but if there's an issue we try to blindly overwrite below
-	if err == nil {
-		if !strings.Contains(strings.ToLower(string(contents)), "betterdiscord") {
-			log.Printf("✅ No injection found for %s\n", discord.Channel.Name())
-			return nil
+	// Roll back anything done after the rename so a partial failure never
+	// leaves Discord without a loadable app.
+	rollback := func() {
+		os.RemoveAll(appDir)
+		if renamed && !utils.Exists(originalAsar) {
+			os.Rename(preservedAsar, originalAsar)
 		}
 	}
 
-	if err := os.WriteFile(indexFile, []byte(`module.exports = require("./core.asar");`), 0o644); err != nil {
-		log.Printf("❌ Unable to write file %s\n", indexFile)
+	if err := os.MkdirAll(appDir, 0755); err != nil {
+		log.Printf("❌ Unable to create %s\n", appDir)
 		log.Printf("   %s\n", err.Error())
+		rollback()
 		return err
 	}
-	log.Printf("✅ Removed from %s\n", discord.Channel.Name())
 
+	if err := os.WriteFile(filepath.Join(appDir, "package.json"), []byte(appPackageJSON), 0o644); err != nil {
+		log.Printf("❌ Unable to write package.json in %s\n", appDir)
+		log.Printf("   %s\n", err.Error())
+		rollback()
+		return err
+	}
+
+	if err := os.WriteFile(filepath.Join(appDir, "index.js"), []byte(appIndexScript), 0o644); err != nil {
+		log.Printf("❌ Unable to write index.js in %s\n", appDir)
+		log.Printf("   %s\n", err.Error())
+		rollback()
+		return err
+	}
+
+	if !utils.Exists(filepath.Join(appDir, "index.js")) ||
+		!utils.Exists(filepath.Join(appDir, "package.json")) ||
+		!utils.Exists(preservedAsar) {
+		rollback()
+		return fmt.Errorf("injection verification failed in %s", resources)
+	}
+
+	log.Printf("✅ Injected into %s\n", resources)
 	return nil
 }
 
-// TODO: consider putting this in the betterdiscord package
-func (discord *DiscordInstall) IsInjected() bool {
-	indexFile := filepath.Join(discord.CorePath, "index.js")
-	contents, err := os.ReadFile(indexFile)
-	if err != nil {
-		return false
+// uninject reverses inject: it removes the shadow `app/` directory and restores
+// Discord's original app.asar from the preserved copy.
+func (discord *DiscordInstall) uninject() error {
+	resources := discord.ResourcesPath
+	originalAsar := filepath.Join(resources, "app.asar")
+	preservedAsar := filepath.Join(resources, "betterdiscord.app.asar")
+	appDir := filepath.Join(resources, "app")
+
+	if utils.Exists(appDir) {
+		if err := os.RemoveAll(appDir); err != nil {
+			log.Printf("❌ Unable to remove %s\n", appDir)
+			log.Printf("   %s\n", err.Error())
+			return err
+		}
 	}
-	lower := strings.ToLower(string(contents))
-	return strings.Contains(lower, "betterdiscord")
+
+	// Only restore when a preserved copy exists and we wouldn't clobber a live
+	// app.asar (crash-recovery / partial-state safety).
+	if utils.Exists(preservedAsar) && !utils.Exists(originalAsar) {
+		if err := os.Rename(preservedAsar, originalAsar); err != nil {
+			log.Printf("❌ Unable to restore app.asar in %s\n", resources)
+			log.Printf("   %s\n", err.Error())
+			return err
+		}
+	}
+
+	log.Printf("✅ Removed from %s\n", discord.Channel.Name())
+	return nil
+}
+
+// IsInjected reports whether this install currently has the app.asar shadow in
+// place: both our `app/index.js` entry and the preserved original must exist.
+func (discord *DiscordInstall) IsInjected() bool {
+	resources := discord.ResourcesPath
+	return utils.Exists(filepath.Join(resources, "app", "index.js")) &&
+		utils.Exists(filepath.Join(resources, "betterdiscord.app.asar"))
 }
