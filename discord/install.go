@@ -12,9 +12,8 @@ import (
 
 type DiscordInstall struct {
 	// ResourcesPath is the Discord install's `resources` directory (the one
-	// holding app.asar). The json tag stays `corePath` so the existing Wails
-	// bindings and frontend keep working; a full frontend rename is deferred.
-	ResourcesPath string               `json:"corePath"`
+	// holding app.asar).
+	ResourcesPath string               `json:"resourcesPath"`
 	Channel       types.DiscordChannel `json:"channel"`
 	Version       string               `json:"version"`
 	IsFlatpak     bool                 `json:"isFlatpak"`

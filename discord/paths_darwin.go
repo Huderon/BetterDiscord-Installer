@@ -31,3 +31,9 @@ func init() {
 func Validate(proposed string) *DiscordInstall {
 	return validateUnixStyleInstall(proposed, false, false)
 }
+
+// DefaultBrowseDir is where the "browse for Discord" dialog should open: app
+// bundles live in /Applications.
+func DefaultBrowseDir() string {
+	return filepath.Join("/", "Applications")
+}

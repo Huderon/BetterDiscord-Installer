@@ -5,7 +5,7 @@ import {GetDiscordPath} from "@api";
 const app = $state<AppState>({
     eulaAgreed: false,
     action: "install",
-    corePaths: {stable: "", ptb: "", canary: ""},
+    resourcePaths: {stable: "", ptb: "", canary: ""},
     channels: {stable: false, ptb: false, canary: false},
     options: {
         install: {restartDiscord: true},
@@ -28,8 +28,8 @@ try {
     for (const channel of channels) {
         // eslint-disable-next-line new-cap
         void GetDiscordPath(channel)
-            .then(path => app.corePaths[channel] = path)
-            .catch(() => {/* leave corePaths[channel] empty (e.g. not in Wails) */});
+            .then(path => app.resourcePaths[channel] = path)
+            .catch(() => {/* leave resourcePaths[channel] empty (e.g. not in Wails) */});
     }
 }
 catch {

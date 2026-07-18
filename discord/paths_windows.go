@@ -29,3 +29,13 @@ func init() {
 func Validate(proposed string) *DiscordInstall {
 	return validateWindowsStyleInstall(proposed)
 }
+
+// DefaultBrowseDir is where the "browse for Discord" dialog should open: Discord
+// installs under %LOCALAPPDATA%.
+func DefaultBrowseDir() string {
+	if dir := os.Getenv("LOCALAPPDATA"); dir != "" {
+		return dir
+	}
+	config, _ := os.UserConfigDir()
+	return config
+}

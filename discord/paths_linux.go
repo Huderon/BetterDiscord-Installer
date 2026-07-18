@@ -66,3 +66,16 @@ func Validate(proposed string) *DiscordInstall {
 	// Native Linux validation with Flatpak and Snap detection
 	return validateUnixStyleInstall(proposed, true, true)
 }
+
+// DefaultBrowseDir is where the "browse for Discord" dialog should open. Under
+// WSL that's the Windows user's %LOCALAPPDATA%; natively it's the config dir
+// (~/.config), which is also where the new updater installs Discord.
+func DefaultBrowseDir() string {
+	if wsl.IsWSL() {
+		if winHome, err := wsl.WindowsHome(); err == nil && winHome != "" {
+			return filepath.Join(winHome, "AppData", "Local")
+		}
+	}
+	config, _ := os.UserConfigDir()
+	return config
+}
