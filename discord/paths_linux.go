@@ -76,6 +76,9 @@ func DefaultBrowseDir() string {
 			return filepath.Join(winHome, "AppData", "Local")
 		}
 	}
-	config, _ := os.UserConfigDir()
+	config, err := os.UserConfigDir()
+	if err != nil {
+		return os.Getenv("HOME")
+	}
 	return config
 }
