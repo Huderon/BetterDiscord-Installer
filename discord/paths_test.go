@@ -70,6 +70,16 @@ func TestGetChannel(t *testing.T) {
 			path:     filepath.Join("C:", "Users", "Me", "AppData", "Local", "DiscordCanary", "app-1.0.9002", "modules", "discord_desktop_core-1", "discord_desktop_core"),
 			expected: types.Canary,
 		},
+		{
+			name:     "macOS bundle name",
+			path:     filepath.Join("/Applications", "Discord Canary.app", "Contents", "Resources"),
+			expected: types.Canary,
+		},
+		{
+			name:     "macOS stable bundle name",
+			path:     filepath.Join("/Applications", "Discord.app", "Contents", "Resources"),
+			expected: types.Stable,
+		},
 	}
 
 	for _, tt := range tests {
