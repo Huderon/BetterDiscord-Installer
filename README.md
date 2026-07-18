@@ -95,6 +95,10 @@ Snap mounts Discord's application files as a read-only squashfs. The installer i
 
 It places a small loader inside Discord's own app files (a `resources/app` folder) and preserves Discord's original `app.asar` next to it. Because this loads before Discord's updater runs, BetterDiscord can keep itself injected across Discord updates — so you generally only need to run the installer once. Uninstalling restores Discord's original files.
 
+### I'm running the installer under WSL — do I need to do anything special?
+
+Yes: **fully close Discord before installing, repairing, or uninstalling.** WSL support targets a Windows Discord install, but the installer can't see or manage the Windows Discord process from the Linux side, so it can't stop Discord for you. If Discord is still running it holds a lock on `app.asar` and the operation will fail — close Discord and try again. (For headless or CLI-based workflows, the BetterDiscord CLI is a better fit.)
+
 ### How can I use the global BetterDiscord folder with Flatpak?
 
 1. Grant the Flatpak app access to the BetterDiscord config directory:

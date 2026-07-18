@@ -77,7 +77,8 @@ func (discord *DiscordInstall) inject(bd *betterdiscord.BDInstall) error {
 			}
 		}
 		if err := os.Rename(originalAsar, preservedAsar); err != nil {
-			log.Printf("❌ Unable to preserve app.asar in %s\n", resources)
+			log.Printf("❌ Unable to modify app.asar in %s\n", resources)
+			log.Printf("   Discord may still be running, please fully close it and try again.\n")
 			log.Printf("   %s\n", err.Error())
 			return err
 		}
@@ -159,6 +160,7 @@ func (discord *DiscordInstall) uninject() error {
 		// Normal revert: restore Discord's original app from the preserved copy.
 		if err := os.Rename(preservedAsar, originalAsar); err != nil {
 			log.Printf("❌ Unable to restore app.asar in %s\n", resources)
+			log.Printf("   Discord may still be running — please fully close it and try again.\n")
 			log.Printf("   %s\n", err.Error())
 			return err
 		}
