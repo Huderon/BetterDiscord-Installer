@@ -9,11 +9,14 @@ import (
 )
 
 type DiscordInstall struct {
-	CorePath  string               `json:"corePath"`
-	Channel   types.DiscordChannel `json:"channel"`
-	Version   string               `json:"version"`
-	IsFlatpak bool                 `json:"isFlatpak"`
-	IsSnap    bool                 `json:"isSnap"`
+	// ResourcesPath is the Discord install's `resources` directory (the one
+	// holding app.asar). The json tag stays `corePath` so the existing Wails
+	// bindings and frontend keep working; a full frontend rename is deferred.
+	ResourcesPath string               `json:"corePath"`
+	Channel       types.DiscordChannel `json:"channel"`
+	Version       string               `json:"version"`
+	IsFlatpak     bool                 `json:"isFlatpak"`
+	IsSnap        bool                 `json:"isSnap"`
 }
 
 // InstallBD installs BetterDiscord into this Discord installation
@@ -118,7 +121,7 @@ func (discord *DiscordInstall) GetBetterDiscordInstall() (*betterdiscord.BDInsta
 			segment = ".config"
 		}
 
-		configPath, err := utils.FindSegment(discord.CorePath, segment)
+		configPath, err := utils.FindSegment(discord.ResourcesPath, segment)
 		if err != nil {
 			return nil, err
 		}

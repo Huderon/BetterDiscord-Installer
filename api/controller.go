@@ -139,7 +139,7 @@ func (d *Controller) BrowseForDiscord(schannel string) string {
 	}
 
 	if result := discord.ResolvePath(selection); result != nil {
-		return result.CorePath
+		return result.ResourcesPath
 	}
 
 	return ""
