@@ -80,6 +80,21 @@ func TestGetChannel(t *testing.T) {
 			path:     filepath.Join("/Applications", "Discord.app", "Contents", "Resources"),
 			expected: types.Stable,
 		},
+		{
+			name:     "flatpak dashed canary dir",
+			path:     filepath.Join("/var", "lib", "flatpak", "app", "com.discordapp.DiscordCanary", "current", "active", "files", "discord-canary", "resources"),
+			expected: types.Canary,
+		},
+		{
+			name:     "flatpak dashed ptb dir",
+			path:     filepath.Join("/var", "lib", "flatpak", "app", "com.discordapp.DiscordPTB", "current", "active", "files", "discord-ptb", "resources"),
+			expected: types.PTB,
+		},
+		{
+			name:     "flatpak stable dir",
+			path:     filepath.Join("/var", "lib", "flatpak", "app", "com.discordapp.Discord", "current", "active", "files", "discord", "resources"),
+			expected: types.Stable,
+		},
 	}
 
 	for _, tt := range tests {
