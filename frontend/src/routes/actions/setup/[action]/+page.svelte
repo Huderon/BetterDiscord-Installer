@@ -14,7 +14,7 @@
     const nextLabel = $derived(app.action[0].toUpperCase() + app.action.slice(1));
     async function browseForChannel(platform: DiscordChannel) {
         const resourcesPath = await findDiscordDialog(platform);
-        app.corePaths[platform] = resourcesPath;
+        app.resourcePaths[platform] = resourcesPath;
         app.channels[platform] = Boolean(resourcesPath);
     }
 </script>
@@ -30,9 +30,9 @@
     {#each Object.entries(labels) as [channel, label] (channel)}
         <Multiselect
             onclick={() => browseForChannel(channel as DiscordChannel)}
-            description={app.corePaths[channel as DiscordChannel] || "Not Found"}
+            description={app.resourcePaths[channel as DiscordChannel] || "Not Found"}
             bind:checked={app.channels[channel as DiscordChannel]}
-            disabled={!app.corePaths[channel as DiscordChannel]}
+            disabled={!app.resourcePaths[channel as DiscordChannel]}
         >
             {#snippet icon()}
                 <img src={imageUrls[channel as DiscordChannel]} alt="Platform Icon" />

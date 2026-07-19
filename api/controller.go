@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"installer/discord"
 	"installer/types"
@@ -37,9 +36,9 @@ func (d *Controller) GetDiscordPath(channel string) string {
 }
 
 // #region Actions
-func (action *Controller) Install(corePaths []string, options types.InstallOptions) {
-	for i := range corePaths {
-		install := discord.ResolvePath(corePaths[i])
+func (action *Controller) Install(resourcePaths []string, options types.InstallOptions) {
+	for i := range resourcePaths {
+		install := discord.ResolvePath(resourcePaths[i])
 		if install == nil {
 			continue
 		}
@@ -56,9 +55,9 @@ func (action *Controller) Install(corePaths []string, options types.InstallOptio
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Controller) Uninstall(corePaths []string, options types.UninstallOptions) {
-	for i := range corePaths {
-		install := discord.ResolvePath(corePaths[i])
+func (action *Controller) Uninstall(resourcePaths []string, options types.UninstallOptions) {
+	for i := range resourcePaths {
+		install := discord.ResolvePath(resourcePaths[i])
 		if install == nil {
 			continue
 		}
@@ -73,9 +72,9 @@ func (action *Controller) Uninstall(corePaths []string, options types.UninstallO
 	runtime.EventsEmit(action.ctx, "success")
 }
 
-func (action *Controller) Repair(corePaths []string, options types.RepairOptions) {
-	for i := range corePaths {
-		install := discord.ResolvePath(corePaths[i])
+func (action *Controller) Repair(resourcePaths []string, options types.RepairOptions) {
+	for i := range resourcePaths {
+		install := discord.ResolvePath(resourcePaths[i])
 		if install == nil {
 			continue
 		}
@@ -119,17 +118,11 @@ func (action *Controller) Repair(corePaths []string, options types.RepairOptions
 
 // #region Dialogs
 func (d *Controller) BrowseForDiscord(schannel string) string {
-	var browsePath string
-	browsePath, err := os.UserConfigDir()
-	if err != nil {
-		browsePath = os.Getenv("HOME")
-	}
-
 	channel := types.ParseChannel(schannel)
 
 	selection, err := runtime.OpenDirectoryDialog(d.ctx, runtime.OpenDialogOptions{
 		Title:                      "Browsing to " + channel.Name(),
-		DefaultDirectory:           browsePath,
+		DefaultDirectory:           discord.DefaultBrowseDir(),
 		ShowHiddenFiles:            true,
 		TreatPackagesAsDirectories: true,
 	})
@@ -139,7 +132,7 @@ func (d *Controller) BrowseForDiscord(schannel string) string {
 	}
 
 	if result := discord.ResolvePath(selection); result != nil {
-		return result.CorePath
+		return result.ResourcesPath
 	}
 
 	return ""

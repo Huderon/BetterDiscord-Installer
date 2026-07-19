@@ -48,7 +48,7 @@ export const createNavState = (state?: Partial<NavigationState>) => {
 export interface AppState {
     eulaAgreed: boolean;
     action: InstallerAction;
-    corePaths: Record<DiscordChannel, string>;
+    resourcePaths: Record<DiscordChannel, string>;
     channels: Record<DiscordChannel, boolean>;
     options: ActionOptionsMap;
     navigation: NavigationState;

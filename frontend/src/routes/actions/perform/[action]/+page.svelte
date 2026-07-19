@@ -55,10 +55,10 @@
     const currentAction = app.action;
 
     const installPaths: Partial<Record<DiscordChannel, string>> = {};
-    for (const channelKey in app.corePaths) {
+    for (const channelKey in app.resourcePaths) {
         const channel = channelKey as DiscordChannel;
         if (!app.channels[channel]) continue;
-        installPaths[channel] = app.corePaths[channel];
+        installPaths[channel] = app.resourcePaths[channel];
     }
 
     let active = $state(true);

@@ -9,33 +9,42 @@ import (
 	"installer/types"
 )
 
-// UninstallBD with neither full-uninstall nor restart should only de-inject the
-// core's index.js — the safe path that never touches the global BD folder or
-// the running Discord process.
+// UninstallBD with neither full-uninstall nor restart reverts the app.asar
+// shadow without removing the global BD folder or relaunching Discord. (Discord
+// isn't running in the test, so the stop() step is a no-op.)
 func TestUninstallBD_UninjectOnly(t *testing.T) {
-	corePath := t.TempDir()
-	indexFile := filepath.Join(corePath, "index.js")
-	seed := `require("BetterDiscord/data/betterdiscord.asar");` + "\n" + `module.exports = require("./core.asar");`
-	if err := os.WriteFile(indexFile, []byte(seed), 0o644); err != nil {
-		t.Fatalf("failed to seed injected index.js: %v", err)
+	resources := t.TempDir()
+	// Seed an injected state: preserved asar + shadow app/ entry.
+	original := []byte("original app.asar")
+	if err := os.WriteFile(filepath.Join(resources, "betterdiscord.app.asar"), original, 0o644); err != nil {
+		t.Fatalf("seed preserved asar: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(resources, "app"), 0o755); err != nil {
+		t.Fatalf("mkdir app: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(resources, "app", "index.js"), []byte("x"), 0o644); err != nil {
+		t.Fatalf("seed index.js: %v", err)
 	}
 
-	install := &DiscordInstall{CorePath: corePath, Channel: types.Stable}
+	install := &DiscordInstall{ResourcesPath: resources, Channel: types.Stable}
 	if err := install.UninstallBD(types.UninstallOptions{FullUninstall: false, RestartDiscord: false}); err != nil {
 		t.Fatalf("UninstallBD() failed: %v", err)
 	}
 
 	if install.IsInjected() {
-		t.Error("expected index.js to be de-injected after UninstallBD")
+		t.Error("expected the shadow to be reverted after UninstallBD")
 	}
-	contents, _ := os.ReadFile(indexFile)
-	if want := `module.exports = require("./core.asar");`; string(contents) != want {
-		t.Errorf("index.js after uninstall = %q, expected %q", string(contents), want)
+	restored, err := os.ReadFile(filepath.Join(resources, "app.asar"))
+	if err != nil {
+		t.Fatalf("app.asar not restored: %v", err)
+	}
+	if string(restored) != string(original) {
+		t.Errorf("app.asar after uninstall = %q, expected %q", restored, original)
 	}
 }
 
 func TestGetBetterDiscordInstall_Global(t *testing.T) {
-	install := &DiscordInstall{CorePath: "/some/discord/core", Channel: types.Stable}
+	install := &DiscordInstall{ResourcesPath: "/some/discord/core", Channel: types.Stable}
 
 	bd, err := install.GetBetterDiscordInstall()
 	if err != nil {
@@ -46,56 +55,37 @@ func TestGetBetterDiscordInstall_Global(t *testing.T) {
 	}
 }
 
-func TestGetBetterDiscordInstall_FlatpakResolvesConfig(t *testing.T) {
+// Flatpak's BD folder is recomputed as ~/.var/app/{id}/config/BetterDiscord from
+// the channel, independent of the (read-only deployment) resources path.
+func TestGetBetterDiscordInstall_FlatpakRecomputesDataRoot(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("uses POSIX-style flatpak paths")
 	}
-	// A flatpak-style core path containing a "config" segment.
-	configDir := filepath.Join(t.TempDir(), "config")
-	corePath := filepath.Join(configDir, "discord", "0.0.1", "modules", "discord_desktop_core")
-	install := &DiscordInstall{CorePath: corePath, Channel: types.Stable, IsFlatpak: true}
-
-	bd, err := install.GetBetterDiscordInstall()
+	home, err := os.UserHomeDir()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Skipf("no home dir: %v", err)
 	}
-	if bd == nil {
-		t.Fatal("expected non-nil BD install")
-	}
-	if want := filepath.Join(configDir, "BetterDiscord"); bd.Root() != want {
-		t.Errorf("Root() = %s, expected %s", bd.Root(), want)
-	}
-}
 
-func TestGetBetterDiscordInstall_SnapResolvesConfig(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("uses POSIX-style snap paths")
+	cases := []struct {
+		channel types.DiscordChannel
+		id      string
+	}{
+		{types.Stable, "com.discordapp.Discord"},
+		{types.Canary, "com.discordapp.DiscordCanary"},
+		{types.PTB, "com.discordapp.DiscordPTB"},
 	}
-	// A snap-style core path uses the ".config" segment.
-	configDir := filepath.Join(t.TempDir(), ".config")
-	corePath := filepath.Join(configDir, "discord", "0.0.1", "modules", "discord_desktop_core")
-	install := &DiscordInstall{CorePath: corePath, Channel: types.Stable, IsSnap: true}
+	for _, tc := range cases {
+		// A resources path in the read-only deployment tree (no "config" segment).
+		resources := "/var/lib/flatpak/app/" + tc.id + "/current/active/files/discord/resources"
+		install := &DiscordInstall{ResourcesPath: resources, Channel: tc.channel, IsFlatpak: true}
 
-	bd, err := install.GetBetterDiscordInstall()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if want := filepath.Join(configDir, "BetterDiscord"); bd.Root() != want {
-		t.Errorf("Root() = %s, expected %s", bd.Root(), want)
-	}
-}
-
-// Regression test for the nil-deref fix: a snap/flatpak core path missing the
-// expected config segment must surface an error, not return a nil *BDInstall
-// that callers would dereference and panic on.
-func TestGetBetterDiscordInstall_FlatpakMissingSegment_Errors(t *testing.T) {
-	install := &DiscordInstall{CorePath: "/no/matching/segment/here", Channel: types.Stable, IsFlatpak: true}
-
-	bd, err := install.GetBetterDiscordInstall()
-	if err == nil {
-		t.Fatal("expected an error when the config segment is missing")
-	}
-	if bd != nil {
-		t.Errorf("expected nil BD install on error, got %+v", bd)
+		bd, err := install.GetBetterDiscordInstall()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		want := filepath.Join(home, ".var", "app", tc.id, "config", "BetterDiscord")
+		if bd.Root() != want {
+			t.Errorf("channel %v: Root() = %s, expected %s", tc.channel, bd.Root(), want)
+		}
 	}
 }

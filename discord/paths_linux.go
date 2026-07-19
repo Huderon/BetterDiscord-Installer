@@ -10,36 +10,40 @@ import (
 )
 
 func init() {
-	config, _ := os.UserConfigDir()
-	home, _ := os.UserHomeDir()
+	config, errConfig := os.UserConfigDir()
+	home, errHome := os.UserHomeDir()
+
+	// Flatpak (global). The app.asar lives in the read-only deployment files.
+	// Example: `/var/lib/flatpak/app/com.discordapp.DiscordCanary/current/active/files/discord-canary/resources/app.asar`.
+	// This has no home/config dependency, so it's always searched.
 	paths := []string{
-		// Native. Data is stored under `~/.config`.
+		filepath.Join("/var", "lib", "flatpak", "app", "com.discordapp.{CHANNEL}", "current", "active", "files", "{channel-}", "resources"),
+
+		// Snap is intentionally omitted: its read-only squashfs mount can't host
+		// the app.asar shadow, so the new injection method does not support it.
+	}
+
+	// Only search config/home-relative locations when those dirs resolved;
+	// otherwise the joins would produce relative paths anchored at the current
+	// working directory.
+	if errConfig == nil && config != "" {
+		// Native. The new updater lays out versioned app dirs under `~/.config`.
 		// Example: `~/.config/discordcanary`.
-		// Core: `~/.config/discordcanary/0.0.90/modules/discord_desktop_core/core.asar`.
-		// Updated Core: `~/.config/discordcanary/app-0.0.90/modules/discord_desktop_core-1/discord_desktop_core/core.asar`.
-		filepath.Join(config, "{channel}"),
-
-		// Flatpak. These user data paths are universal for all Flatpak installations on all machines.
-		// Example: `.var/app/com.discordapp.DiscordCanary/config/discordcanary`.
-		// Core: `.var/app/com.discordapp.DiscordCanary/config/discordcanary/0.0.90/modules/discord_desktop_core/core.asar`
-		// Updated Core: `.var/app/com.discordapp.DiscordCanary/config/discordcanary/app-0.0.90/modules/discord_desktop_core-1/discord_desktop_core/core.asar`.
-		filepath.Join(home, ".var", "app", "com.discordapp.{CHANNEL}", "config", "{channel}"),
-
-		// Snap. Just like with Flatpaks, these paths are universal for all Snap installations.
-		// Example: `snap/discord/current/.config/discord`.
-		// Example: `snap/discord-canary/current/.config/discordcanary`.
-		// Core: `snap/discord-canary/current/.config/discordcanary/0.0.90/modules/discord_desktop_core/core.asar`.
-		// Updated Core: `snap/discord-canary/current/.config/discordcanary/app-0.0.90/modules/discord_desktop_core-1/discord_desktop_core/core.asar`.
-		// NOTE: Snap user data always exists, even when the Snap isn't mounted/running.
-		filepath.Join(home, "snap", "{channel-}", "current", ".config", "{channel}"),
+		// Resources: `~/.config/discordcanary/app-0.0.90/resources/app.asar`.
+		paths = append(paths, filepath.Join(config, "{channel}"))
+	}
+	if errHome == nil && home != "" {
+		// Flatpak (user). Same layout under the per-user flatpak tree (writable).
+		// Example: `~/.local/share/flatpak/app/com.discordapp.DiscordCanary/current/active/files/discord-canary/resources/app.asar`.
+		paths = append(paths, filepath.Join(home, ".local", "share", "flatpak", "app", "com.discordapp.{CHANNEL}", "current", "active", "files", "{channel-}", "resources"))
 	}
 
 	if wsl.IsWSL() {
 		winHome, err := wsl.WindowsHome()
 		if err == nil && winHome != "" {
-			// WSL. Data is stored under the Windows user's AppData folder.
+			// WSL. Windows Discord installs under the Windows user's AppData folder.
 			// Example: `/mnt/c/Users/Username/AppData/Local/DiscordCanary`.
-			// Core: `/mnt/c/Users/Username/AppData/Local/DiscordCanary/app-1.0.9218/modules/discord_desktop_core-1/discord_desktop_core core.asar`.
+			// Resources: `/mnt/c/Users/Username/AppData/Local/DiscordCanary/app-1.0.9218/resources/app.asar`.
 			paths = append(paths, filepath.Join(winHome, "AppData", "Local", "{CHANNEL}"))
 		}
 	}
@@ -69,4 +73,20 @@ func Validate(proposed string) *DiscordInstall {
 
 	// Native Linux validation with Flatpak and Snap detection
 	return validateUnixStyleInstall(proposed, true, true)
+}
+
+// DefaultBrowseDir is where the "browse for Discord" dialog should open. Under
+// WSL that's the Windows user's %LOCALAPPDATA%; natively it's the config dir
+// (~/.config), which is also where the new updater installs Discord.
+func DefaultBrowseDir() string {
+	if wsl.IsWSL() {
+		if winHome, err := wsl.WindowsHome(); err == nil && winHome != "" {
+			return filepath.Join(winHome, "AppData", "Local")
+		}
+	}
+	config, err := os.UserConfigDir()
+	if err != nil {
+		return os.Getenv("HOME")
+	}
+	return config
 }
