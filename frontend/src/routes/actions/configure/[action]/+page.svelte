@@ -17,13 +17,19 @@
         uninstall: "Decide how much data should be removed."
     };
 
-    const installOptions: Array<{label: string; description: string; bind: keyof typeof app.options.install}> = [
+    const installOptions: Array<{label: string; description: string; bind: keyof typeof app.options.install}> = $derived([
         {
             label: "Restart Discord after install",
             description: "Disabling this means BetterDiscord won't apply until the next restart.",
             bind: "restartDiscord"
-        }
-    ];
+        },
+        // Revealed only once the hidden titlebar tap gesture unlocks developer mode.
+        ...(app.devUnlocked ? [{
+            label: "Use the latest development build",
+            description: "Installs BetterDiscord's rolling pre-release instead of the stable version.",
+            bind: "useDevBuild" as const
+        }] : [])
+    ]);
 
     const repairOptions: Array<{label: string; description: string; bind: keyof typeof app.options.repair}> = [
         {

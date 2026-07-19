@@ -31,7 +31,7 @@ func (a *App) GetVersion() string {
 func (a *App) CheckForUpdate() {
 	// If the version doesn't start with "v" then it's a
 	// development build, so we don't check for updates
-	if !strings.HasPrefix(version, "v") {
+	if !strings.HasPrefix(version, "v") || strings.HasSuffix(version, "-dev") {
 		return
 	}
 

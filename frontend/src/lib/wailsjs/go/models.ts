@@ -7,6 +7,7 @@ export namespace types {
 	}
 	export interface InstallOptions {
 	    restartDiscord: boolean;
+	    useDevBuild: boolean;
 	}
 	export interface RepairOptions {
 	    disablePlugins: boolean;

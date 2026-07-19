@@ -5,10 +5,11 @@ import {GetDiscordPath} from "@api";
 const app = $state<AppState>({
     eulaAgreed: false,
     action: "install",
+    devUnlocked: false,
     resourcePaths: {stable: "", ptb: "", canary: ""},
     channels: {stable: false, ptb: false, canary: false},
     options: {
-        install: {restartDiscord: true},
+        install: {restartDiscord: true, useDevBuild: false},
         repair: {
             disablePlugins: false,
             disableThemes: false,

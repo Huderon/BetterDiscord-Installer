@@ -1,5 +1,6 @@
 <script lang="ts">
     import quit from "$lib/utils/quit";
+    import app from "$lib/stores/state.svelte";
     import {GetVersion} from "@app";
     import {WindowMinimise as minimize} from "@wails/runtime";
 
@@ -9,14 +10,48 @@
     try {
         // eslint-disable-next-line new-cap
         void GetVersion()
-            .then((v) => version = v)
-            .catch(() => version = "development");
+            .then((v) => version = v || "v0.0.0-dev")
+            .catch(() => version = "v0.0.0-dev");
     }
     catch {
         // Probably not running in Wails, fallback to development version
-        version = "development";
+        version = "v0.0.0-dev";
     }
 
+    // Hidden developer unlock: clicking the version string 10 times reveals the
+    // "development build" install option, mirroring the in-client easter egg. The
+    // unlock lives in in-memory state, so it never persists across launches.
+    const unlockThreshold = 10;
+    const hintThreshold = 7;
+    let clicks = $state(0);
+
+    function clickVersion(event: MouseEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (app.devUnlocked) return;
+        clicks += 1;
+        if (clicks >= unlockThreshold) app.devUnlocked = true;
+    }
+
+    function resetDeveloperUnlock(event: MouseEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        app.devUnlocked = false;
+        clicks = 0;
+        app.options.install.useDevBuild = false; // forcibly reset the option to false when relocking
+    }
+
+    // Once the user is close, echo the in-client "X clicks away" nudge.
+    const remaining = $derived(unlockThreshold - clicks);
+    const showHint = $derived(!app.devUnlocked && clicks >= hintThreshold);
+
+    // Only show the "X clicks away" hint when the user is hovering over the version string.
+    let isVersionHovered = $state(false);
+    const versionString = $derived.by(() => {
+        if (app.devUnlocked) return `${version} (dev)`;
+        if (showHint && isVersionHovered) return `(${remaining} ${remaining === 1 ? "click" : "clicks"} to go)`;
+        return version;
+    });
 </script>
 
 <header class="titlebar" class:type-mac={macButtons === true} class:type-standard={macButtons !== true}>
@@ -24,7 +59,20 @@
         <path d="M1402.2,631.7c-9.7-353.4-286.2-496-642.6-496H68.4v714.1l442,398V490.7h257c274.5,0,274.5,344.9,0,344.9H597.6v329.5h169.8c274.5,0,274.5,344.8,0,344.8h-699v354.9h691.2c356.3,0,632.8-142.6,642.6-496c0-162.6-44.5-284.1-122.9-368.6C1357.7,915.8,1402.2,794.3,1402.2,631.7z" />
         <path d="M1262.5,135.2L1262.5,135.2l-76.8,0c26.6,13.3,51.7,28.1,75,44.3c70.7,49.1,126.1,111.5,164.6,185.3c39.9,76.6,61.5,165.6,64.3,264.6l0,1.2v1.2c0,141.1,0,596.1,0,737.1v1.2l0,1.2c-2.7,99-24.3,188-64.3,264.6c-38.5,73.8-93.8,136.2-164.6,185.3c-22.6,15.7-46.9,30.1-72.6,43.1h72.5c346.2,1.9,671-171.2,671-567.9V716.7C1933.5,312.2,1608.7,135.2,1262.5,135.2z" />
     </svg>
-    <span class="title">BetterDiscord Installer {version}</span>
+    <span class="title">
+        BetterDiscord Installer
+        <span
+            class="version"
+            onclick={clickVersion}
+            oncontextmenu={resetDeveloperUnlock}
+            onmouseenter={() => isVersionHovered = true}
+            onmouseleave={() => isVersionHovered = false}
+            // Deliberately not keyboard-reachable: this is a hidden developer gesture
+            role="presentation"
+        >
+            {versionString}
+        </span>
+    </span>
     <div class="window-controls">
         {#if macButtons === true}
             <button tabindex="-1" onclick={quit} id="close" aria-label="close" type="button">
@@ -77,6 +125,16 @@
         transform: translate(-50%, 0);
         color: var(--text-muted);
         font-size: 14px;
+        width: max-content;
+    }
+
+    /* Carve out of the drag region so clicks register, but keep the default cursor so it never hints at being interactive. */
+    .version {
+        -webkit-app-region: no-drag;
+        --wails-draggable: no-drag;
+        cursor: default;
+        user-select: none;
+        white-space: nowrap;
     }
 
     .window-controls {

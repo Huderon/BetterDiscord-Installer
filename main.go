@@ -17,7 +17,7 @@ import (
 var assets embed.FS
 
 // Set by ldflags during build
-var version = ""
+var version = "v0.0.0-dev"
 
 func main() {
 	// Create an instance of the app structure
