@@ -2,6 +2,7 @@ package types
 
 type InstallOptions struct {
 	RestartDiscord bool `json:"restartDiscord"`
+	UseDevBuild    bool `json:"useDevBuild"`
 }
 
 type RepairOptions struct {
