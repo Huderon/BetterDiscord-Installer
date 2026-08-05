@@ -46,7 +46,7 @@ Linux install support:
 
 - Native Discord install: ✅ Supported
 - Flatpak Discord install: ✅ Supported for per-user installs; ⚠️ system-wide/global installs need elevated write access and aren't supported yet
-- Snap Discord install: ❌ Unsupported — Snap mounts Discord's files read-only, so the installer can't modify the app
+- Snap Discord install: ❌ Unsupported; snap mounts Discord's files read-only, so the installer can't modify the app
 
 ## Downloads
 
@@ -89,15 +89,15 @@ Yes, for **per-user** Flatpak installs (the default `flatpak install --user …`
 
 ### Why is Snap Discord unsupported on Linux?
 
-Snap mounts Discord's application files as a read-only squashfs. The installer injects BetterDiscord by modifying files inside the Discord app, which isn't possible on a read-only mount — so Snap can't be supported.
+Snap mounts Discord's application files as a read-only squashfs. The installer injects BetterDiscord by modifying files inside the Discord app, which isn't possible on a read-only mount, so Snap can't be supported.
 
 ### How does the installer add BetterDiscord to Discord?
 
-It places a small loader inside Discord's own app files (a `resources/app` folder) and preserves Discord's original `app.asar` next to it. Because this loads before Discord's updater runs, BetterDiscord can keep itself injected across Discord updates — so you generally only need to run the installer once. Uninstalling restores Discord's original files.
+It places a small loader inside Discord's own app files (a `resources/app` folder) and preserves Discord's original `app.asar` next to it. Because this loads before Discord's updater runs, BetterDiscord can keep itself injected across Discord updates, so you generally only need to run the installer once. Uninstalling restores Discord's original files.
 
-### I'm running the installer under WSL — do I need to do anything special?
+### I'm running the installer under WSL, do I need to do anything special?
 
-Yes: **fully close Discord before installing, repairing, or uninstalling.** WSL support targets a Windows Discord install, but the installer can't see or manage the Windows Discord process from the Linux side, so it can't stop Discord for you. If Discord is still running it holds a lock on `app.asar` and the operation will fail — close Discord and try again. (For headless or CLI-based workflows, the BetterDiscord CLI is a better fit.)
+Yes: **fully close Discord before installing, repairing, or uninstalling.** WSL support targets a Windows Discord install, but the installer can't see or manage the Windows Discord process from the Linux side, so it can't stop Discord for you. If Discord is still running it holds a lock on `app.asar` and the operation will fail. In this case, close Discord and try again. (For headless or CLI-based workflows, the BetterDiscord CLI is a better fit.)
 
 ### How can I use the global BetterDiscord folder with Flatpak?
 

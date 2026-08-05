@@ -115,7 +115,11 @@ func (discord *DiscordInstall) inject(bd *betterdiscord.BDInstall) error {
 	// app/ even when re-injecting an already-injected install, so we must still
 	// restore app.asar from the preserved copy to keep Discord launchable.
 	rollback := func() {
-		os.RemoveAll(appDir)
+		err := os.RemoveAll(appDir)
+		if err != nil {
+			log.Printf("❌ Rollback failed: unable to remove %s\n", appDir)
+			log.Printf("   %s\n", err.Error())
+		}
 		if !utils.Exists(originalAsar) && utils.Exists(preservedAsar) {
 			if err := os.Rename(preservedAsar, originalAsar); err != nil {
 				log.Printf("❌ Rollback failed: unable to restore app.asar in %s\n", resources)
