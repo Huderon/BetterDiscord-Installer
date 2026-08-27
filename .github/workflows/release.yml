@@ -4,18 +4,71 @@ on:
   push:
     tags:
       - "v*"
+  # Manual re-run escape hatch: if one OS leg fails after another has already
+  # created the GitHub release, re-running the whole tag push would redo work
+  # that already succeeded. Dispatch instead with just the legs that failed.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)release, e.g. v2.0.0"
+        required: true
+        type: string
+      ref:
+        description: "Branch/SHA to build from (default: the tag itself). Use a branch to pick up release-tooling fixes landed after tagging."
+        required: false
+        default: ""
+        type: string
+      legs:
+        description: "Comma-separated legs to run (linux, windows, darwin)"
+        required: true
+        default: "linux,windows,darwin"
+        type: string
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
+  plan:
+    name: Plan legs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - name: Select release legs
+        id: plan
+        env:
+          # `inputs` is empty on tag pushes, so that path always runs all legs.
+          LEGS: ${{ inputs.legs || 'linux,windows,darwin' }}
+        run: |
+          set -euo pipefail
+          # Order matters: the first leg to run CREATES the GitHub release.
+          all='[
+            {"os":"ubuntu-latest","release_os":"linux","skip_flags":"winget,homebrew"},
+            {"os":"windows-latest","release_os":"windows","skip_flags":"homebrew"},
+            {"os":"macos-latest","release_os":"darwin","skip_flags":"winget"}
+          ]'
+          want=$(jq -Rc 'split(",") | map(ascii_downcase | gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<<"$LEGS")
+          unknown=$(jq -r --argjson all "$all" '. - ($all | map(.release_os)) | join(", ")' <<<"$want")
+          if [ -n "$unknown" ]; then
+            echo "::error::unknown leg(s): $unknown (valid: linux, windows, darwin)"
+            exit 1
+          fi
+          matrix=$(jq -c --argjson want "$want" 'map(select(.release_os as $o | $want | index($o)))' <<<"$all")
+          if [ "$(jq 'length' <<<"$matrix")" -eq 0 ]; then
+            echo "::error::no legs selected from '$LEGS'"
+            exit 1
+          fi
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          jq -r '"Running legs: " + (map(.release_os) | join(", "))' <<<"$matrix" >> "$GITHUB_STEP_SUMMARY"
+
   release:
-    name: Release (${{ matrix.os }})
+    name: Release (${{ matrix.release_os }})
+    needs: plan
     runs-on: ${{ matrix.os }}
     # No-clobber release scheme — these three must stay in sync:
     #   1. max-parallel: 1      → the first leg CREATES the GitHub release; the
@@ -27,21 +80,16 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        include:
-          - os: ubuntu-latest
-            release_os: linux
-            skip_flags: winget,homebrew
-          - os: windows-latest
-            release_os: windows
-            skip_flags: homebrew
-          - os: macos-latest
-            release_os: darwin
-            skip_flags: winget
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          # GoReleaser derives the version from the checked-out tag, so a manual
+          # re-run has to check out that tag rather than the dispatch branch --
+          # unless `ref` overrides it to recover from a bad config at the tag.
+          ref: ${{ inputs.ref || inputs.tag || github.ref }}
 
       - name: Install Linux dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -62,8 +110,16 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean --skip=${{ matrix.skip_flags }}
+          # Building from `ref` means HEAD isn't the tagged commit, so the git
+          # state validation has to come off and the version be pinned by hand.
+          args: release --clean --skip=${{ matrix.skip_flags }}${{ inputs.ref && ',validate' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_PAT: ${{ secrets.GH_PAT }}
+          # Empty on tag pushes, where GoReleaser reads the tag from git itself.
+          GORELEASER_CURRENT_TAG: ${{ inputs.tag }}
+          # GH_PAT must always be defined: the tap/winget token templates are
+          # `{{ .Env.GH_PAT }}` and GoReleaser errors on an undefined key. The
+          # default token can't push cross-repo, so this fallback only exists so
+          # the failure is an auth error rather than a template error.
+          GH_PAT: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           RELEASE_OS: ${{ matrix.release_os }}

@@ -142,6 +142,10 @@ checksum:
 release:
   prerelease: auto
   mode: keep-existing
+  # Makes re-running a single OS leg against an existing release idempotent:
+  # without this, re-uploading an artifact that is already attached is a hard
+  # error, which would strand a partially-published release.
+  replace_existing_artifacts: true
   extra_files:
     # Built by scripts/build-appimage.sh on the linux leg; the wildcard globs
     # safely match nothing on the other OS legs.
@@ -187,7 +191,10 @@ homebrew_casks:
       owner: BetterDiscord
       name: homebrew-tap
       branch: main
-      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+      # Token fields are NOT normal templates: GoReleaser only accepts a bare
+      # `{{ .Env.VAR }}` here (no functions, no interpolation), so the
+      # GITHUB_TOKEN fallback has to live in the workflow env instead.
+      token: "{{ .Env.GH_PAT }}"
 
 winget:
   - name: BetterDiscord Installer
@@ -213,7 +220,8 @@ winget:
       owner: betterdiscord
       name: winget-pkgs
       branch: installer-{{ .Tag }}-{{ .Now.Format "20060102150405" }}
-      token: "{{ envOrDefault \"GH_PAT\" .Env.GITHUB_TOKEN }}"
+      # See the homebrew_casks token note above: bare `{{ .Env.VAR }}` only.
+      token: "{{ .Env.GH_PAT }}"
       pull_request:
         enabled: true
         base:
