@@ -1,0 +1,91 @@
+# https://taskfile.dev
+version: '3'
+
+tasks:
+  default:
+    desc: List all available tasks
+    cmds:
+      - task --list-all
+    silent: true
+
+  # Development tasks
+  dev:
+    desc: Run the installer in Wails dev mode (hot-reloading frontend)
+    cmds:
+      - wails dev {{if eq OS "linux"}}-tags webkit2_41{{end}}
+
+  build:
+    desc: Build the installer for the current platform
+    cmds:
+      - wails build {{if eq OS "linux"}}-tags webkit2_41{{end}}
+
+  # Frontend tasks
+  frontend:
+    desc: Install frontend dependencies and build the frontend
+    # Same commands as scripts/build-frontend.sh (kept for the GoReleaser
+    # hook), inlined here so the task works without a POSIX sh.
+    dir: frontend
+    cmds:
+      - bun install --frozen-lockfile
+      - bun run build
+
+  frontend:check:
+    desc: Typecheck and lint the frontend
+    dir: frontend
+    cmds:
+      - bun run check
+      - bun run lint
+
+  # Testing and code quality tasks
+  test:
+    desc: Run all Go tests
+    cmds:
+      - go test ./...
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  check:
+    desc: Run all checks (frontend + Go)
+    cmds:
+      - task: frontend:check
+      - task: vet
+      - task: test
+
+  # Release tasks
+  validate:
+    desc: Validate the GoReleaser configuration
+    cmds:
+      - goreleaser check
+    preconditions:
+      - sh: command -v goreleaser
+        msg: 'goreleaser not installed. See: https://goreleaser.com/install/'
+
+  snapshot:
+    desc: Build a local snapshot release for the current platform (no publish)
+    cmds:
+      # winget/homebrew are skipped because those pipes error when the
+      # current platform has no artifacts for them; in CI each OS leg
+      # skips them via --skip flags in the release workflow instead.
+      - goreleaser release --snapshot --clean --skip=winget,homebrew
+    preconditions:
+      - sh: command -v goreleaser
+        msg: 'goreleaser not installed. See: https://goreleaser.com/install/'
+
+  # Dependency management
+  deps:
+    desc: Tidy and verify Go deps, install frontend deps
+    cmds:
+      - go mod tidy
+      - go mod download
+      - go mod verify
+      - cd frontend && bun install
+
+  # Clean tasks
+  clean:
+    desc: Remove build output
+    cmds:
+      - rm -rf dist build/bin
+      - rm -f *.syso

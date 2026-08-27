@@ -1,0 +1,23 @@
+{
+    "$schema": "https://wails.io/schemas/config.v2.json",
+    "name": "BetterDiscord Installer",
+    "outputfilename": "BetterDiscord-Installer",
+    "frontend:install": "bun install",
+    "frontend:build": "bun run build",
+    "frontend:dev:watcher": "bun run dev",
+    "frontend:dev:serverUrl": "auto",
+    "wailsjsdir": "./frontend/src/lib",
+    "bindings": {
+      "ts_generation": {
+        "outputType": "interfaces"
+      }
+    },
+    "info": {
+      "productName": "BetterDiscord Installer",
+      "productVersion": "2.0.0-alpha"
+    },
+    "author": {
+      "name": "Zerebos",
+      "email": "me@zerebos.com"
+    }
+  }

@@ -4,3 +4,8 @@ node_modules/
 thumbs.db
 .idea/
 app/
+build/bin
+snippets/
+.task/
+*.log
+*.syso
